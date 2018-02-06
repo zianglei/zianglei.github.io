@@ -1,5 +1,5 @@
 ---
-title: 博客的Hello World
+title: Hello World
 date: 2018-02-03 01:53:05
 tags:
 - 随笔

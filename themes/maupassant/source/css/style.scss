@@ -1561,6 +1561,7 @@ table {
   }
 }
 
+
 .article-share-box {
   position: absolute;
   display: none;
@@ -1628,6 +1629,27 @@ table {
   }
 }
 
+
+.article-share-wechat {
+  @extend .article-share-element;
+  &:before{
+    content: "\f1d7";
+  }
+  &:hover{
+    background: #44b549;
+  }
+}
+
+
+.article-share-qq {
+  @extend .article-share-element;
+  &:before{
+    content: "\f1d6";
+  }
+  &:hover{
+    background: #ffcc33;
+  }
+}
 .article-share-facebook {
   @extend .article-share-element;
   &:before {
