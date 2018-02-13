@@ -3,7 +3,8 @@ title: 读书笔记 | Java8 行为参数化
 date: 2018-02-06 16:55:42
 tags: 
   - Java8
-categories: Java
+categories: 
+  - [Java,读书笔记]
 toc: true
 ---
 
@@ -24,9 +25,9 @@ public List<Apple> selectApple(List<Apple> inventory, String color){
     return result;
 }
 ```
-然后直接调用
+然后调用
 ```java
-selectApple(inventory, 'RED');
+List<Apple> result = selectApple(inventory, 'RED');
 ```
 
 使用你的代码农场主很快就筛出了红苹果。过了两天，农场主又改变了需求，他想要筛选重量大于150g的苹果。虽然你很讨厌改需求，但是这个需求实现起来还算简单，直接将上面筛选颜色的更改一下就行了
@@ -44,12 +45,12 @@ public List<Apple> selectApple(List<Apple> inventory, int weight){
 ```
 然后调用
 ```java
-selectApple(inventory, 150);
+List<Apple> result = selectApple(inventory, 150);
 ```
 
 隔了几天，农场主又改需求了，他还想把仓库中的**西瓜**按照颜色和重量分别存到其他不同的仓库。。。
 <div style="text-align: center">
-<img src="https://pic4.zhimg.com/80/v2-e6ecb99d82832b3d63c3845948240f44_hd.jpg"/>
+<img src="http://p3jggzq4i.bkt.clouddn.com/v2-e6ecb99d82832b3d63c3845948240f44_hd.jpg"/>
 </div>
 
 ## 行为参数化
@@ -158,6 +159,6 @@ public static <T> List<T> select(List<T> inventory, Predict<T> predict){
 
 这样在调用的时候，就可以传入不同的实体类来筛选不同的物体
 ```java
-List<Apple> result = select(inventory, <Apple apple>->"RED".equals(apple.getColor()));
-List<Watermelon> result = select(inventory, <Watermelon wm>->"GREEN".equals(wm.getColor()));
+List<Apple> result = select(inventory, (Apple apple)->"RED".equals(apple.getColor()));
+List<Watermelon> result = select(inventory, (Watermelon wm)->"GREEN".equals(wm.getColor()));
 ```
