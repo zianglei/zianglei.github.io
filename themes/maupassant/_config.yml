@@ -73,7 +73,8 @@ widgets: ## Six widgets in sidebar provided: search, category, tag, recent_posts
 links:
   - title: 屠城
     url: https://www.haomwei.com/technology/maupassant-hexo.html
-
+  - title: 稚晖-优秀学长的博客
+    url: http://www.pengzhihui.xyz/    
 timeline:
   - num: 1
     word: 2018/2/3-博客正式开张，开始记录
