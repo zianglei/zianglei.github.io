@@ -30,17 +30,19 @@ lsusb
 查看磁盘的ID号
 ```bash
 ls -al /dev/disk/by-id/
-``` 
+```
 
+结果如下
 ![](http://p3jggzq4i.bkt.clouddn.com/2018-06-10-21-18-26.png)
 
 可以看到usb网卡的ID号为sr0，挂载sr0并查看里面的内容可以发现存储的是windows上的驱动程序，证明usb网卡现在是存储模式
 
+挂载之后可以看到里面的内容
 ```bash
 sudo mount /dev/sr0 /mnt
-ls -al /mnt
 ```
 
+结果如下
 ![](http://p3jggzq4i.bkt.clouddn.com/2018-06-10-21-20-49.png)
 
 安装usb-modeswitch，会自动安装对应的依赖usb-modeswitch-data（有的教程会让单独安装这个，其实不用）
