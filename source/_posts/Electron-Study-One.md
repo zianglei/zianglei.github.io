@@ -3,7 +3,7 @@ title: Electron学习 | Electron的安装和HelloWorld
 date: 2018-03-26 10:33:45
 tags: Electron
 categories:
-  - 码农学习日常
+  - 学习笔记
 ---
 由于需要对最近的一个项目进行可视化，就像趁着这个机会学习一下Electron和前端，于是就有了这个系列
 <!--more-->
