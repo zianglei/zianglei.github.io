@@ -11,6 +11,7 @@ before_install:
 
 install:
   - npm install
+  - npm install --save hexo-renderer-jade hexo-renderer-stylus
 
 branches:
   only:

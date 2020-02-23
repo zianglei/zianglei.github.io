@@ -7,7 +7,7 @@ title: L的博客 | L’s Blog
 subtitle: 热爱技术，对一切充满兴趣
 description: 
 author: L
-language: zh-CN
+language: en
 timezone:
 
 # URL
@@ -72,7 +72,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: huweihuang
+theme: melody
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
@@ -100,6 +100,3 @@ jsonContent:
     categories: false
     tags: true
 
-sidebar: true
-sidebar-about-description: "Stay hungry, stay foolish"
-sidebar-avatar: img/icon.jpeg
