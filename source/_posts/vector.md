@@ -16,7 +16,7 @@ toc: true
 
 ## 向量的ADT定义
 
-![ACB6296A-2D9E-432F-83A4-E0265D9540E7](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/1.png)
+![向量ADT](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/1.png)
 
 其中disordered() 判断是否有紧邻的逆序对，返回逆序对个数，如果为0，代表是有序向量
 
@@ -52,7 +52,7 @@ Tips：加倍扩容多少倍合适？使用2倍的扩容因子扩容后占用的
 
 分摊复杂度所考虑的一串操作序列一定是真实可行的，并且该序列必须要足够长
 
-![CC6254CA-B95D-40DC-9165-FA570F033A9B](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/2.png)
+![分摊复杂度](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/2.png)
 
 ## 插入
 
@@ -79,7 +79,7 @@ int Vector<T>::remove(Rank lo, Rank hi) {
 }
 ```
 
-##单元素删除
+## 单元素删除
 
 ```c++
 template <typename T>
@@ -122,11 +122,11 @@ int Vector<T>::deduplicate() {
 }·
 ```
 
-###算法证明
+### 算法证明
 
-![F6484D8F-6635-4321-9F47-3C6501D4EE7D](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228144323_F6484D8F-6635-4321-9F47-3C6501D4EE7D.png)
+![正确性](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228144323_F6484D8F-6635-4321-9F47-3C6501D4EE7D.png)
 
-![C1A71BA3-7A8D-4298-8AF2-6A7EE663A928](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228144339_C1A71BA3-7A8D-4298-8AF2-6A7EE663A928.png)
+![单调性](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228144339_C1A71BA3-7A8D-4298-8AF2-6A7EE663A928.png)
 
 ## 遍历
 
@@ -139,4 +139,57 @@ template <typename T> template <typename VST>
 void Vector<T>::traverse(VST& visit) 
 { for (int i = 0; i < _size; ++i) visit(_elem[i]);}
 ```
+
+## 有序向量
+
+### 唯一性
+
+#### 有序性
+
+有序序列中，任意一对相邻元素顺序；无序序列中，总有一对相邻元素逆序
+
+```c++
+template <typename T>
+void Vector<T>::disordered() {
+  int n = 0;
+  for (int i = 1; i < _size; i++) {
+    n += (_elem[i - 1] > _elem[i]);
+  }
+  return n; // n为0代表有序
+}
+```
+
+#### 有序向量唯一化低效版（O(n^2))
+
+```c++
+template <typename T>
+int Vector<T>::uniquify() {
+  int i = 0;
+  int old_size = _size;
+  while (i < _size - 1) {
+    _elem[i] == _elem[i + 1] ? remove(i + 1): i++;
+  }
+  return old_size - _size;
+}
+```
+
+分析：最坏情况下，每次调用remove都有O(n)的复杂度，则总时间复杂度为O(n^2)
+
+#### 有序向量唯一化高效版（O(n))
+
+```c++
+template <typename T>
+int Vector<T>::uniquify() {
+  int i = 0, j = 0;
+  while (++j < _size) {	// 逐一扫描
+     if (_elem[i] != _elem[j]) _elem[++i] = _elem[j]; // 当发现不同元素时，向前移动
+  }
+  _size = ++i; shrink(); // 截断末尾
+  return j - i;
+}
+```
+
+分析：时间复杂度为O(n)
+
+**![唯一化高效算法流程图](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228152750_image-20200228152737081.png)**
 
