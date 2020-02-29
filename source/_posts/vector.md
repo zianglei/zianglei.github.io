@@ -142,9 +142,7 @@ void Vector<T>::traverse(VST& visit)
 
 ## 有序向量
 
-### 唯一性
-
-#### 有序性
+### 有序性
 
 有序序列中，任意一对相邻元素顺序；无序序列中，总有一对相邻元素逆序
 
@@ -159,7 +157,7 @@ void Vector<T>::disordered() {
 }
 ```
 
-#### 有序向量唯一化低效版（O(n^2))
+#### 有序向量去除重复元素低效版（O(n^2))
 
 ```c++
 template <typename T>
@@ -175,7 +173,7 @@ int Vector<T>::uniquify() {
 
 分析：最坏情况下，每次调用remove都有O(n)的复杂度，则总时间复杂度为O(n^2)
 
-#### 有序向量唯一化高效版（O(n))
+#### 有序向量去除重复元素高效版（O(n))
 
 ```c++
 template <typename T>
@@ -191,5 +189,65 @@ int Vector<T>::uniquify() {
 
 分析：时间复杂度为O(n)
 
-**![唯一化高效算法流程图](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228152750_image-20200228152737081.png)**
+![唯一化高效算法流程图](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228152750_image-20200228152737081.png)
+
+#### 二分查找
+
+##### 语义约定
+
+至少应该便于自身向量的维护：`V.insert(1 + V.search(e), e)`，即便查找失败，也应该返回新元素适当插入的位置；若允许重复元素，则每一组也需要按照插入的顺序排列
+
+**约定：在有序向量`V[lo, hi)`中，确定`不大于e的最后一个`元素**
+
+```c++
+// 简单版本二分查找
+static Rank Vector<T>::binarySearch(T* A, T e, Rank lo, Rank hi) {
+  while (lo < hi) {
+    Rank mid = (lo + hi) / 2;
+    if (e < A[mid]) hi = mid;
+    else if (A[mid] < e) lo = mid + 1;
+    else return mid;
+  }
+  return -1;
+}
+```
+
+时间复杂度分析 T(n) = T(n/2) + O(1) = O(logn) （O(1)是因为每次比较只有1/2次比较次数，为常数项）
+
+##### 查找长度
+
+二分查找的计算包括元素之间的比较和秩的算术运算，由于元素的比较有时不可能在常数时间内完成， 因此我们主要关注在二分查找中的比较次数，也即**查找长度**。
+
+对于上述二分查找实现而言，成功查找长度和失败查找长度均为O(1.5logN)（通过举例得到，实际递推公式参考《数据结构》一书）。
+
+##### 改进余地
+
+在二分查找的过程中，即使是成功查找，相同迭代次数下对应的查找长度也不近相等，这是因为向左和向右的比较次数不同，从而导致查找长度的不均衡。
+
+#### fibonacci查找
+
+由于向左的比较次数较少，因此fibonacci查找的思路是调整前后区域的宽度，适当的加长前向量，缩短后向量
+
+![fibonacci查找示意图](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200229133124_KsD97R.png)
+
+```c++
+#include "..\fibonacci\Fib.h"
+template <typename T> static Rank fibSearch(T* A, T e, Rank lo, Rank hi) {
+  Fib fib(hi - lo);
+  while(lo < hi) {
+    while (hi - lo < fib.get()) fib.prev();	// 调整斐波那契数列，直到得到不小于n的斐波那契数，这一步花费O(logN)
+   	Rank mid = lo + fib.get() - 1;
+    if (e < A[mid]) hi = mid;
+    else if (A[mid] < hi) lo = mid + 1;
+    else return mid;
+  }
+  return -1;
+}
+```
+
+对于fibonacci查找而言，查找长度为O(1.44logN)（实际递推公式参考《数据结构》一书）。
+
+![最优的中轴点推导](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200229135020_a24axD.png)
+
+上图证明斐波那契查找法平均查找长度最小，但是缺点是需要额外生成斐波那契数列。
 
