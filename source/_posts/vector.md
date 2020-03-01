@@ -4,9 +4,16 @@ date: 2020-02-28 14:46
 categories:
 	- [数据结构]
 toc: true
+
 ---
 
 《数据结构》学习笔记--向量
+
+在给向量规定的ADT中，有几种操作
+
+- 去重：区间去重，单个去重($$O(n^2)$$)，排序后进行去重（$$O(n)$$)
+- 查找：顺序查找$$O(n)$$，二分查找$$O(log(n))$$ (两种改进版，斐波那契查找)，插值查找
+- 排序：冒泡排序（两种优化措施），归并排序
 
 <!--more-->
 
@@ -40,7 +47,7 @@ void Vector<T>::copyFrom(T const* A, Rank lo, Rank hi) {
 
 算术级数，复杂度是末项的平方，即为O(n^2)，分摊成本为O(n)
 
-###加倍式扩容
+### 加倍式扩容
 
 在初始容量为1的满向量，插入n=2^m的过程中，则在第1，2，4，8，16…次插入时都扩容，时间成本为1，2，4，8。。。2^m = n，几何级数，时间复杂度与末项相同，即O(n)
 
@@ -48,7 +55,7 @@ void Vector<T>::copyFrom(T const* A, Rank lo, Rank hi) {
 
 Tips：加倍扩容多少倍合适？使用2倍的扩容因子扩容后占用的空间总是大于之前分配的所有空间总和，对缓存不友好
 
-## **分摊复杂度**
+## 分摊复杂度
 
 分摊复杂度所考虑的一串操作序列一定是真实可行的，并且该序列必须要足够长
 
@@ -191,7 +198,7 @@ int Vector<T>::uniquify() {
 
 ![唯一化高效算法流程图](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200228152750_image-20200228152737081.png)
 
-#### 二分查找
+#### 二分查找（A）
 
 ##### 语义约定
 
@@ -251,3 +258,157 @@ template <typename T> static Rank fibSearch(T* A, T e, Rank lo, Rank hi) {
 
 上图证明斐波那契查找法平均查找长度最小，但是缺点是需要额外生成斐波那契数列。
 
+#### 二分查找改进版（B）
+
+```c++
+template <typename T> static Rank binSearch(T* A, T const & e, Rank lo, Rank hi) {
+  while (hi - lo > 1) { // 有效查找区间的宽度缩短为1时，算法就会终止
+    Rank mid = (lo + hi) >> 1;
+    (e < A[mid]) ? hi = mid : lo = mid;
+  }
+  return (e == A[lo]) ? lo : -1;
+}
+```
+
+这样做将向左和向右的成本都降为1，最好（坏）的情况变坏（好），整体性能更趋稳定
+
+但是上述的都没有满足之前提到的约定的语义：**在有序向量`V[lo, hi)`中，确定`不大于e的最后一个`元素**
+
+#### 二分查找改进版（C）
+
+```c++
+// 满足约定的语义
+template <typename T> static Rank binSearch(T* A, T const& e, Rank lo, Rank hi) {
+  while (lo < hi) {
+    Rank mid = (lo + hi) >> 1;
+    (e < A[mid]) ? hi = mid : lo = mid + 1;
+  }
+  return --lo;
+}
+```
+
+##### 算法证明
+
+可行性：需证明`A[0, lo) <= e < A[hi, n)`
+
+![image-20200301105915755](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200301105920_image-20200301105915755.png)
+
+#### 插值查找
+
+假设数组内的元素是有序且**按照某种规律随机分布**
+
+假设按照线性分布的规律，则中轴点的计算方法为
+$$
+mi = lo + (hi - lo) * \frac{(e - A[lo])}{(A[hi]-A[lo])}
+$$
+
+```c++
+template <typename T> static Rank interpolate(T* A, T const & e, Rank lo, Rank hi) {
+  while (lo < hi) {
+    Rank mi = lo + (hi - lo - 1) * (e * 1.0 - A[lo])/(A[hi - 1] - A[lo]);
+    if (mi < lo) return -1;
+    if (e < A[mi]) hi = mi;
+    else if (A[mi] < e) lo = mi + 1;  // 此处采用了 mi + 1，因为这样才不会导致mi == lo 时无限循环
+    else return mi;
+  }
+  return -1;
+}
+```
+
+经过证明可知每次插值都会将规模缩小为$$\sqrt{n}$$，则对比与二进制数位来说相当于砍了一半，即为$$\frac{1}{2}\log_2{n}$$
+
+同样经过$$\log{n}$$步，所以时间复杂度为O($$\log{n}\log{n}$$)
+
+**缺点：插值查找很容易受到干扰，尤其是在向量不满足线性分布规律的前提下，因此其仅适用于非常大的搜索区间范围内。当搜索空间变小后，可以使用二分查找（搜索空间中等）或者顺序查找（搜索空间较小**
+
+## 排序
+
+### 起泡排序
+
+```c++
+// 最简单版本 O(n^2)
+void bubble(T* A, int lo, int hi) {
+  for (int i = hi - 1; i >= lo; i--) {
+    for (int j = lo; j < i; j++) {
+      if (A[j] > A[j + 1]) swap(j, j+1);
+    }
+  }
+}
+```
+
+优化：在逐趟扫描交换过程中，如果某一趟没有发生逆序对的扫描交换，则表明已经有序，直接跳出
+
+```c++
+void bubble(T* A, int lo, int hi) {
+  for (int i = hi; i >= lo; i--) {
+    int sorted = 1;
+    for (int j = lo + 1; j < hi; j++) {
+      if (A[j-1] < A[j]) {
+        swap(j-1, j);
+        sorted = 0;
+      }
+    }
+    if (sorted) return;
+  }
+}
+```
+
+再优化：在以下情况中，如果后面红色的部分已经有序，则实际上是将前面绿色的部分（长度为r）进行排序，总时间为$$O(nr)$$ ，如果能有一种技巧检测出有序的情况，使得实际排序的序列为$$\sqrt{n}$$，则实际的时间复杂度为$$O(n)$$
+
+![image-20200301141702155](http://ziangleiblog.oss-cn-beijing.aliyuncs.com/uPic/20200301144202_image-20200301141702155.png)
+
+```c++
+void bubble(T* A, int lo, int hi) {
+  int last = lo;    // 注意初始化逆序对为[lo - 1, lo]
+  for (int i = hi; i > lo; i = last) {
+    for (int j = lo + 1; j < i; j++) {
+      if (A[j-1] < A[j]) {
+        last = j;
+        swap(j-1, j);
+      }
+    }
+  }
+}
+```
+
+#### 分析
+
+冒泡排序的最后为$$O(n)$$，最坏为$$O(n^2)$$ ，上述优化只是针对一般情况而言。
+
+稳定性：冒泡排序是稳定的
+
+### 归并排序
+
+前提：在基于比较的排序算法中，最好的时间复杂度为$$\Omega({n\log{}})$$
+
+思路：基于分治的思想，将要排序的向量一分为二，直到有序，然后再分别合并。主要问题就是如何将两个有序的序列进行合并
+
+时间复杂度：$$T(n) = T(n/2) + O(n)$$，可知时间复杂度为$$O(n\log(n))$$
+
+```c++
+void mergeSort(T* A, int lo, int hi) { // [lo, hi)
+  int mid = (lo + hi) >> 1;
+  mergeSort(A, lo, mid);
+  mergeSort(A, mid, hi);
+  merge(A, lo, mid, hi);
+}
+
+void merge(T* A, int lo, int mid, int hi) {
+  int lb = mid - lo;
+  T* B = new T[lb];
+  for (int i = 0; i < lb; i++) B[i] = A[lo + i];
+  int lc = hi - mid; T* C = A + mid;
+  for(int i = lo, j = 0, k = 0; (j < lb) || ( k < lc)) {
+    if ((j < lb) && ((lc <= k) || (B[j] <= C[k])) A[i++] = B[j++];
+    if ((k < lc) && ((lb <= j) || (C[k] < B[j]))) A[i++] = C[k++];
+  }
+}
+```
+
+## 总结
+
+在给向量规定的ADT中，有几种操作
+
+- 去重：区间去重，单个去重($$O(n^2)$$)，排序后进行去重（$$O(n)$$)
+- 查找：顺序查找O(n)，二分查找$$O(log(n))$$ (两种改进版，斐波那契查找)，插值查找
+- 排序：冒泡排序（两种优化措施），归并排序
