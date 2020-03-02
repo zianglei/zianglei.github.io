@@ -112,7 +112,7 @@ Rank Vector<T>::find (T const& e, Rank lo, Rank hi) const {
 
 此查找算法是输入敏感算法：最优O(1)，最坏O(n)
 
-## 唯一化
+## 去重
 
 ```c++
 // 删除重复元素，返回被删除元素数目
@@ -123,10 +123,10 @@ int Vector<T>::deduplicate() {
     int oldsize = _size;
     Rank r = 1;
     while (r < _size) {
-        find(_elem[r], 0, r) < 0 ? r++ : remove(r);
+        find(_elem[r], 0, r) < 0 ? r++ : remove(r); // 注意是移除当前下标为r的元素
     }
     return oldsize - _size;
-}·
+}
 ```
 
 ### 算法证明
@@ -219,7 +219,9 @@ static Rank Vector<T>::binarySearch(T* A, T e, Rank lo, Rank hi) {
 }
 ```
 
-时间复杂度分析 T(n) = T(n/2) + O(1) = O(logn) （O(1)是因为每次比较只有1/2次比较次数，为常数项）
+时间复杂度分析 T(n) = T(n/2) + O(1) = O(logn) （O(1)是因为每次比较只有1～2次比较次数，为常数项）
+
+空间复杂度为$$O(1)$$，如果是递归版本，空间复杂度为$$O(log(n))$$
 
 ##### 查找长度
 
@@ -306,12 +308,12 @@ $$
 template <typename T> static Rank interpolate(T* A, T const & e, Rank lo, Rank hi) {
   while (lo < hi) {
     Rank mi = lo + (hi - lo - 1) * (e * 1.0 - A[lo])/(A[hi - 1] - A[lo]);
-    if (mi < lo) return -1;
+    if (mi < lo) return mid; // 在数组内部不存在的时候返回mid
     if (e < A[mi]) hi = mi;
     else if (A[mi] < e) lo = mi + 1;  // 此处采用了 mi + 1，因为这样才不会导致mi == lo 时无限循环
     else return mi;
   }
-  return -1;
+  return --lo; // 当查找不到的时候返回上一个值
 }
 ```
 
@@ -359,8 +361,9 @@ void bubble(T* A, int lo, int hi) {
 
 ```c++
 void bubble(T* A, int lo, int hi) {
-  int last = lo;    // 注意初始化逆序对为[lo - 1, lo]
+  int last;    
   for (int i = hi; i > lo; i = last) {
+    last = lo; // 注意每次循环都要初始化逆序对为[lo - 1, lo]
     for (int j = lo + 1; j < i; j++) {
       if (A[j-1] < A[j]) {
         last = j;
@@ -383,10 +386,11 @@ void bubble(T* A, int lo, int hi) {
 
 思路：基于分治的思想，将要排序的向量一分为二，直到有序，然后再分别合并。主要问题就是如何将两个有序的序列进行合并
 
-时间复杂度：$$T(n) = T(n/2) + O(n)$$，可知时间复杂度为$$O(n\log(n))$$
+时间复杂度：$$T(n) = T(n/2) + O(n)$$，可知时间复杂度为$$O(n\log(n))$$。归并排序的最好、最坏时间复杂度均为$$O(nlog(n))$$
 
 ```c++
 void mergeSort(T* A, int lo, int hi) { // [lo, hi)
+  if ((hi - lo) < 2) return;
   int mid = (lo + hi) >> 1;
   mergeSort(A, lo, mid);
   mergeSort(A, mid, hi);
@@ -400,7 +404,7 @@ void merge(T* A, int lo, int mid, int hi) {
   int lc = hi - mid; T* C = A + mid;
   for(int i = lo, j = 0, k = 0; (j < lb) || ( k < lc)) {
     if ((j < lb) && ((lc <= k) || (B[j] <= C[k])) A[i++] = B[j++];
-    if ((k < lc) && ((lb <= j) || (C[k] < B[j]))) A[i++] = C[k++];
+    if ((k < lc) && ((lb <= j) || (C[k] < B[j]))	) A[i++] = C[k++];
   }
 }
 ```
