@@ -12,6 +12,8 @@ before_install:
 install:
   - npm install
   - npm install hexo-renderer-jade hexo-renderer-stylus --save
+  - npm uninstall hexo-renderer-marked --save
+  - npm install hexo-renderer-kramed --save
 
 branches:
   only:
