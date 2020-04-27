@@ -4,7 +4,6 @@ date: 2020-02-28 14:46
 categories:
 	- [数据结构]
 toc: true
-
 ---
 
 《数据结构》学习笔记--向量
@@ -70,6 +69,18 @@ Rank Vector<T>::insert (Rank r, T const &e) {
     for (int i = _size; i > r; i--) _elem[i] = _elem[i - 1];
     _elem[r] = e; _size++;
     return r;
+}
+
+template <typename T>
+Rank Vector<T>::expand() {
+  if (_size < _capacity) return;
+  if (_capacity < DEFAULT_CAPACITY) _capacity = DEFAULT_CAPACITY;
+  T* oldElem = _elem;
+  _elem = new T[_capacity <<= 1];
+  for (int i = 0; i < _size; i++) {
+    _elem[i] = oldElem[i];
+  }
+  delete [] oldElem;
 }
 ```
 
@@ -365,7 +376,7 @@ void bubble(T* A, int lo, int hi) {
   for (int i = hi; i > lo; i = last) {
     last = lo; // 注意每次循环都要初始化逆序对为[lo - 1, lo]
     for (int j = lo + 1; j < i; j++) {
-      if (A[j-1] < A[j]) {
+      if (A[j-1] > A[j]) {
         last = j;
         swap(j-1, j);
       }
@@ -402,11 +413,16 @@ void merge(T* A, int lo, int mid, int hi) {
   T* B = new T[lb];
   for (int i = 0; i < lb; i++) B[i] = A[lo + i];
   int lc = hi - mid; T* C = A + mid;
-  for(int i = lo, j = 0, k = 0; (j < lb) || ( k < lc)) {
-    if ((j < lb) && ((lc <= k) || (B[j] <= C[k])) A[i++] = B[j++];
-    if ((k < lc) && ((lb <= j) || (C[k] < B[j]))	) A[i++] = C[k++];
+//  for(int i = lo, j = 0, k = 0; (j < lb) || ( k < lc);) {
+//    if ((j < lb) && ((lc <= k) || (B[j] <= C[k])) A[i++] = B[j++];
+//    if ((k < lc) && ((lb <= j) || (C[k] < B[j]))	) A[i++] = C[k++];
+//  }
+  for(int i = lo, j = 0, k = 0; j < lb;) {
+    A[i++] = (lc <= k || B[j] <= C[k]) ? B[j++] : C[k++];
   }
 }
+
+// TODO: 归并排序自下而上实现
 ```
 
 ## 总结
