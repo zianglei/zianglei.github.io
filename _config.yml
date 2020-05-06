@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: L的博客 | L’s Blog
-subtitle: 热爱技术，对一切充满兴趣
-description: 
-author: L
-language: en
+title: 栖息之地
+subtitle: 交个朋友吧～
+description: 热爱科技，喜欢摆弄新奇的东西
+author: Lei
+language: zh-CN
 timezone:
 
 # URL
@@ -37,12 +37,8 @@ render_drafts: false
 post_asset_folder: false
 relative_link: false
 future: true
-highlight:
-  enable: true
-  line_number: true
-  auto_detect: false
-  tab_replace:
-  
+
+
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
 # per_page: Posts displayed per page. (0 = disable pagination)
@@ -72,7 +68,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: melody
+theme: Butterfly
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
@@ -80,23 +76,4 @@ deploy:
   type: git
   repo: https://github.com/zianglei/zianglei.github.io
   branch: master
-
-jsonContent:
-  meta: false
-  pages: false
-  posts:
-    title: true
-    date: true
-    path: true
-    text: false
-    raw: false
-    content: false
-    slug: false
-    updated: false
-    comments: false
-    link: false
-    permalink: false
-    excerpt: false
-    categories: false
-    tags: true
 
