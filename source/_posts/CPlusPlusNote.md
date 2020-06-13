@@ -288,16 +288,37 @@ MAX(a++, b++)
   }
   ```
 
+  使用Set实现
+
+  ```c++
+  size_t RunProcess {
+    size<int> generated;
+    while (true) {
+      int nextValue = DieRoll();
+      if (generated.count(nextValue)) return generated.size() + 1;
+      generated.insert(nextValue);
+    }
+  }
+  ```
+
+  
+
   小tips：从这个程序中可以得到一个有趣的结论：当骰子的面数呈倍数增加的时候，出现两个相同的数的次数却不会成倍增加，而是$\sqrt{n}$，这称之为生日悖论
+
   - Set能够存储的元素必须保证能够进行比较，因为Set是建立在平衡二叉树上
   - 使用迭代器迭代Set的时候，输出的顺序是按照从小到大的顺序排列的
   - Set的`lower_bound`和`upper_bound`可以返回特殊的迭代器，其中lower_bound返回不小于指定数的迭代器，upper_bound返回大于指定数的迭代器
 
-- Map用于映射对应关系
+- map用于映射对应关系
 
-  - 可以使用`["key"] = value`形式创建和修改map
-  - `insert`也可以插入pair，但是不能修改已经存在的pair。如果已经存在，返回的二元组中second会为false
-  - 和set一样，迭代的时候map仍然返回的是按照key从小到大排序的顺序
+  - map使用平衡二叉树实现，因此放入map的key值必须是可以比较的
+  - map的声明：map<keyType, valueType> m;
+  - map的操作
+    - 插入：可以使用`["key"] = value`形式创建和修改map
+      - 插入：`insert`也可以插入pair，但是不能修改已经存在的pair。如果已经存在，返回的二元组中second会为false
+    - 查找：可以使用find查找map中的key，返回的是一个迭代器，可以defer出一个pair类型
+    - 删除：使用remove删除元素，使用clear清除所有元素
+    - 迭代：和set一样，迭代的时候map仍然返回的是按照key从小到大排序的顺序
 
 ## STL Algorithms
 

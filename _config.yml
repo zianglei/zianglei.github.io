@@ -76,4 +76,3 @@ deploy:
   type: git
   repo: https://github.com/zianglei/zianglei.github.io
   branch: master
-
