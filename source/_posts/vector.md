@@ -296,7 +296,7 @@ template <typename T> static Rank binSearch(T* A, T const& e, Rank lo, Rank hi) 
     Rank mid = (lo + hi) >> 1;
     (e < A[mid]) ? hi = mid : lo = mid + 1;
   }
-  return --lo;
+  return --lo; /*注意在查找时有可能出现target比所有都大，返回的是最后一个元素*/
 }
 ```
 
