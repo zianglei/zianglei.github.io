@@ -1,0 +1,15 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "Justin Lei"
+theme = "hugo-ink"
+
+copyright = "© Justin Lei"
+
+[params]
+	subtitle = "Study forever"
+	avatar = "icons/avatar.png"
+
+[[params.social]]
+name = "Github"
+icon = "github"
+url = "https://github.com/zianglei"
