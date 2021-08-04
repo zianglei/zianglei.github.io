@@ -13,3 +13,8 @@ copyright = "© Justin Lei"
 name = "Github"
 icon = "github"
 url = "https://github.com/zianglei"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
