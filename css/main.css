@@ -189,7 +189,7 @@ ul.flat li {
 }
 
 ul {
-    list-style: disc inside;
+    list-style: disc outside;
 }
 
 .post ul li {
