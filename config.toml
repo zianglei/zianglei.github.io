@@ -11,7 +11,7 @@ copyright = "© Justin Lei"
 
 [params]
 	subtitle = "Study forever"
-	avatar = "icons/avatar.png"
+	avatar = "https://avatars.githubusercontent.com/u/20857777"
 
 [[params.social]]
 name = "Github"
