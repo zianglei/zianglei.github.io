@@ -3,6 +3,10 @@ languageCode = "en-us"
 title = "Justin Lei"
 theme = "hugo-ink"
 
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
+pygmentsstyle = "vs"
+
 copyright = "© Justin Lei"
 
 [params]
