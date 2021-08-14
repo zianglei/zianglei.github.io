@@ -12,7 +12,7 @@ a ^ b
 = ~a · b + a · ~b 
 = a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b)"><meta itemprop=datePublished content="2021-08-11T14:27:13+08:00">
 <meta itemprop=dateModified content="2021-08-11T14:27:13+08:00">
-<meta itemprop=wordCount content="840">
+<meta itemprop=wordCount content="839">
 <meta itemprop=keywords content><meta property="og:title" content="cs:app 第二章 & datalab实验记录">
 <meta property="og:description" content="阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
 布尔运算及定律   吸收律：$A+(A * B) = A$，$A * (A + B) = A$
@@ -126,7 +126,7 @@ a ^ b
 <p><code>= ~a · b + a · ~b </code></p>
 <p><code>= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b) </code></p>
 <p><code>= (a + b) * (~(a * b)) </code>，</p>
-<p>将后一种形式里的 &ldquo;|&rdquo; 替换成 &ldquo;~&&rdquo; 组合即可使用最少的与非运算符实现异或</p>
+<p>将后一种形式里的 &ldquo;+&rdquo; 替换成 &ldquo;~*&rdquo; 组合即可使用最少的与非运算符实现异或</p>
 <p>异或可以用于两数之间不需要中间变量的交换，其原理是利用了异或逆元的思想，即 a^a = 0</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:green>// 设origa代表a的初始值，origb代表b的初始值
 </span><span style=color:green></span>b = a ^ b; <span style=color:green>// 此时b = origa ^ origb
@@ -269,8 +269,7 @@ n |= (n &gt;&gt; 16);
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>  <span style=color:#2b91af>int</span> sign = (x &gt;&gt; 31) &amp; 1; <span style=color:green>// 判断是否是负数
 </span><span style=color:green></span>  <span style=color:#2b91af>int</span> nonzero = ((x ^ (~x + 1)) &gt;&gt; 31) &amp; 1; <span style=color:green>// 判断是否为0
 </span><span style=color:green></span>  <span style=color:#00f>return</span> (~(sign | nonzero)) &amp; 1; <span style=color:green>// 判断符号位
-</span></code></pre></div><p>合并右移符号</p>
-<p>最终版本</p>
+</span></code></pre></div><p>合并右移符号的最终版本</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>  <span style=color:#2b91af>int</span> res = x ^ (~x + 1); 
   <span style=color:#00f>return</span> (~(res | x) &gt;&gt; 31) &amp; 1;
 </code></pre></div><h3 id=howmanybits>howManyBits</h3>
