@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Justin Lei</title><link>https://zianglei.github.io/posts/</link><description>Recent content in Posts on Justin Lei</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© Justin Lei</copyright><lastBuildDate>Wed, 11 Aug 2021 14:27:13 +0800</lastBuildDate><atom:link href="https://zianglei.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>cs:app 第二章 &amp; datalab实验记录</title><link>https://zianglei.github.io/posts/csapp-1/</link><pubDate>Wed, 11 Aug 2021 14:27:13 +0800</pubDate><guid>https://zianglei.github.io/posts/csapp-1/</guid><description>阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
+布尔运算及定律 吸收律：$A+(A * B) = A$，$A * (A + B) = A$
+分配律：$A(B+C) = AB + AC$，$A+(B*C) = (A+B)(A+C)$
+德摩根定律：$\overline{AB} = \bar{A}+\bar{B}$​​​，$\overline{A+B} = \bar{A}\bar{B}$
+异或 异或可以由与或非组合得出，即
+a ^ b
+= ~a · b + a · ~b
+= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b)</description></item></channel></rss>

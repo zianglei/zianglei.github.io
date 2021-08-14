@@ -192,12 +192,23 @@ ul {
     list-style: disc outside;
 }
 
+#TableOfContents li {
+	margin-bottom: 4px;
+}
+
 .post ul li {
     margin-bottom: 10px;
 }
 
 .post ul li p {
     display: inline;
+}
+
+code.has-jax {
+    -webkit-font-smoothing: antialiased;
+    background: inherit !important;
+    border: none !important;
+    font-size: 100%;
 }
 
 .highlight pre {

@@ -1,0 +1,327 @@
+<!doctype html><html>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第二章 & datalab实验记录 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
+<meta itemprop=name content="cs:app 第二章 & datalab实验记录">
+<meta itemprop=description content="阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
+布尔运算及定律   吸收律：$A+(A * B) = A$，$A * (A + B) = A$
+  分配律：$A(B+C) = AB + AC$，$A+(B*C) = (A+B)(A+C)$
+  德摩根定律：$\overline{AB} = \bar{A}+\bar{B}$​​​，$\overline{A+B} = \bar{A}\bar{B}$
+  异或 异或可以由与或非组合得出，即
+a ^ b 
+= ~a · b + a · ~b 
+= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b)"><meta itemprop=datePublished content="2021-08-11T14:27:13+08:00">
+<meta itemprop=dateModified content="2021-08-11T14:27:13+08:00">
+<meta itemprop=wordCount content="840">
+<meta itemprop=keywords content><meta property="og:title" content="cs:app 第二章 & datalab实验记录">
+<meta property="og:description" content="阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
+布尔运算及定律   吸收律：$A+(A * B) = A$，$A * (A + B) = A$
+  分配律：$A(B+C) = AB + AC$，$A+(B*C) = (A+B)(A+C)$
+  德摩根定律：$\overline{AB} = \bar{A}+\bar{B}$​​​，$\overline{A+B} = \bar{A}\bar{B}$
+  异或 异或可以由与或非组合得出，即
+a ^ b 
+= ~a · b + a · ~b 
+= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b)">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zianglei.github.io/posts/csapp-1/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-08-11T14:27:13+08:00">
+<meta property="article:modified_time" content="2021-08-11T14:27:13+08:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="cs:app 第二章 & datalab实验记录">
+<meta name=twitter:description content="阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
+布尔运算及定律   吸收律：$A+(A * B) = A$，$A * (A + B) = A$
+  分配律：$A(B+C) = AB + AC$，$A+(B*C) = (A+B)(A+C)$
+  德摩根定律：$\overline{AB} = \bar{A}+\bar{B}$​​​，$\overline{A+B} = \bar{A}\bar{B}$
+  异或 异或可以由与或非组合得出，即
+a ^ b 
+= ~a · b + a · ~b 
+= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b)">
+<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css>
+<link rel=stylesheet type=text/css media=screen href=https://zianglei.github.io/css/normalize.css>
+<link rel=stylesheet type=text/css media=screen href=https://zianglei.github.io/css/main.css>
+<link id=dark-scheme rel=stylesheet type=text/css href=https://zianglei.github.io/css/dark.css>
+<script src=https://zianglei.github.io/js/feather.min.js></script>
+<script src=https://zianglei.github.io/js/main.js></script>
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
+</head>
+<body>
+<div class="container wrapper">
+<div class=header>
+<div class=avatar>
+<a href=https://zianglei.github.io/>
+<img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
+</a>
+</div>
+<h1 class=site-title><a href=https://zianglei.github.io/>Justin Lei</a></h1>
+<div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
+</nav>
+</div>
+<nav class=nav>
+<ul class=flat>
+</ul>
+</nav>
+</div>
+<div class=post>
+<div class=post-header>
+<div class=meta>
+<div class=date>
+<span class=day>11</span>
+<span class=rest>Aug 2021</span>
+</div>
+</div>
+<div class=matter>
+<h1 class=title>cs:app 第二章 & datalab实验记录</h1>
+</div>
+</div>
+<div>
+<nav id=TableOfContents>
+<ul>
+<li><a href=#阅读笔记>阅读笔记</a>
+<ul>
+<li><a href=#字长>字长</a></li>
+<li><a href=#布尔运算及定律>布尔运算及定律</a></li>
+<li><a href=#异或>异或</a></li>
+</ul>
+</li>
+<li><a href=#常见位运算>常见位运算</a>
+<ul>
+<li><a href=#位运算推荐资料>位运算推荐资料</a></li>
+<li><a href=#浮点数>浮点数</a></li>
+</ul>
+</li>
+<li><a href=#datalab>DataLab</a>
+<ul>
+<li><a href=#istmax>isTmax</a></li>
+<li><a href=#islessorequal>isLessOrEqual</a></li>
+<li><a href=#logicalneg>logicalNeg</a></li>
+<li><a href=#howmanybits>howManyBits</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+<hr>
+<div class=markdown>
+<h2 id=阅读笔记>阅读笔记</h2>
+<h3 id=字长>字长</h3>
+<p>字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。</p>
+<h3 id=布尔运算及定律>布尔运算及定律</h3>
+<ul>
+<li>
+<p>吸收律：$A+(A * B) = A$，$A * (A + B) = A$</p>
+</li>
+<li>
+<p>分配律：$A(B+C) = AB + AC$，$A+(B*C) = (A+B)(A+C)$</p>
+</li>
+<li>
+<p>德摩根定律：$\overline{AB} = \bar{A}+\bar{B}$​​​，$\overline{A+B} = \bar{A}\bar{B}$</p>
+</li>
+</ul>
+<h3 id=异或>异或</h3>
+<p>异或可以由与或非组合得出，即</p>
+<p><code>a ^ b </code></p>
+<p><code>= ~a · b + a · ~b </code></p>
+<p><code>= a * ~a + b * ~b + ~a * b + a * ~b = (a + b) * (~a + ~b) </code></p>
+<p><code>= (a + b) * (~(a * b)) </code>，</p>
+<p>将后一种形式里的 &ldquo;|&rdquo; 替换成 &ldquo;~&&rdquo; 组合即可使用最少的与非运算符实现异或</p>
+<p>异或可以用于两数之间不需要中间变量的交换，其原理是利用了异或逆元的思想，即 a^a = 0</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:green>// 设origa代表a的初始值，origb代表b的初始值
+</span><span style=color:green></span>b = a ^ b; <span style=color:green>// 此时b = origa ^ origb
+</span><span style=color:green></span>a = a ^ b; <span style=color:green>// 此时a = origa ^ origa ^ origb = 0 ^ origb = origb
+</span><span style=color:green></span>b = a ^ b; <span style=color:green>// 此时b = origb ^ origa ^ origb，由于
+</span></code></pre></div><h2 id=常见位运算>常见位运算</h2>
+<ul>
+<li>
+<p>对于有符号数来说，~x = -(x + 1)</p>
+</li>
+<li>
+<p>自增1</p>
+<p>允许负号：-~num，不允许：num + 1</p>
+</li>
+<li>
+<p>自减1</p>
+<p>允许负号：~-num，不允许：~(~num + 1)</p>
+</li>
+<li>
+<p>判断x == y</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>!(x ^ y)
+</code></pre></div></li>
+<li>
+<p>判断一个数是否小于0</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>!(x &gt;&gt; 31)
+</code></pre></div></li>
+<li>
+<p>找到最高为1的位对应的阶数</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:green>// 32bits
+</span><span style=color:green></span>n |= (n &gt;&gt; 1);
+n |= (n &gt;&gt; 2);
+n |= (n &gt;&gt; 4);
+n |= (n &gt;&gt; 8);
+n |= (n &gt;&gt; 16);
+<span style=color:#00f>return</span> n - (n &gt;&gt; 1);
+</code></pre></div><p>本质上是利用二分法将MSB为1的位向右传播，最终n会变为000111111&mldr;1的形式，然后计算出1对应的阶数</p>
+</li>
+<li>
+<p>找到最低位为1对应的阶数</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>n &amp; (n - 1)
+</code></pre></div></li>
+<li>
+<p>二分法查找最高为1的位的索引</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:green>// 输出索引
+</span><span style=color:green></span>uint highest_one_idx(uint x) {
+  <span style=color:#00f>if</span> (x &amp; 0xffff0000U) { x &gt;&gt;= 16; r += 16; }
+  <span style=color:#00f>if</span> (x &amp; 0x0000ff00U) { x &gt;&gt;= 8;  r += 8; }
+  <span style=color:#00f>if</span> (x &amp; 0x000000f0U) { x &gt;&gt;= 4;  r += 4; }
+	<span style=color:#00f>if</span> (x &amp; 0x0000000cU) { x &gt;&gt;= 2;  r += 2; }
+  <span style=color:#00f>if</span> (x &amp; 0x02)        {					 r += 1; }
+  <span style=color:#00f>return</span> r;
+}
+
+<span style=color:green>// 不能使用if
+</span><span style=color:green></span>uint highest_one_idx(uint x) {
+  <span style=color:#2b91af>int</span> tmp = 0, idx = 0;
+  <span style=color:green>// 等价于if (x &gt; 0xffffu)
+</span><span style=color:green></span>  tmp = (~((x &gt;&gt; 16) + ~0) &gt;&gt; 27) &amp; 0x10;
+  idx += tmp, abs &gt;&gt;= tmp;
+  <span style=color:green>// if (x &gt; 0xffu)
+</span><span style=color:green></span>  tmp = (~((x &gt;&gt; 8) + ~0) &gt;&gt; 28) &amp; 0x8;
+  idx += tmp, abs &gt;&gt;= tmp;
+  <span style=color:green>// if (x &gt; 0xfu)
+</span><span style=color:green></span>  tmp = (~((x &gt;&gt; 4) + ~0) &gt;&gt; 29) &amp; 0x4;
+  idx += tmp, abs &gt;&gt;= tmp;
+  <span style=color:green>// if (x &gt; 0x3u)
+</span><span style=color:green></span>  tmp = (~((x &gt;&gt; 2) + ~0) &gt;&gt; 30) &amp; 0x2;
+  idx += tmp, abs &gt;&gt;= tmp;
+
+  <span style=color:green>// if (x == 1)
+</span><span style=color:green></span>  idx += (x &amp; 0x02) &gt;&gt; 1;
+
+  <span style=color:#00f>return</span> r;
+}
+
+</code></pre></div></li>
+<li>
+<p>二分法找到$log_2^n$</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> ulog2 (<span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> u)
+{
+    <span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> s, t;
+
+    t = (u &gt; 0xffff) &lt;&lt; 4; u &gt;&gt;= t;
+    s = (u &gt; 0xff  ) &lt;&lt; 3; u &gt;&gt;= s, t |= s;
+    s = (u &gt; 0xf   ) &lt;&lt; 2; u &gt;&gt;= s, t |= s;
+    s = (u &gt; 0x3   ) &lt;&lt; 1; u &gt;&gt;= s, t |= s;
+
+    <span style=color:#00f>return</span> (t | (u &gt;&gt; 1));
+}
+
+<span style=color:green>// 替换掉&gt;号，和highest_one_idx相同
+</span><span style=color:green></span><span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> ulog2 (<span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> u)
+{
+    <span style=color:#2b91af>unsigned</span> <span style=color:#2b91af>int</span> r = 0, t;
+
+    t = ((~((u &gt;&gt; 16) + ~0U)) &gt;&gt; 27) &amp; 0x10;
+    r |= t, u &gt;&gt;= t;
+    t = ((~((u &gt;&gt;  8) + ~0U)) &gt;&gt; 28) &amp;  0x8;
+    r |= t, u &gt;&gt;= t;
+    t = ((~((u &gt;&gt;  4) + ~0U)) &gt;&gt; 29) &amp;  0x4;
+    r |= t, u &gt;&gt;= t;
+    t = ((~((u &gt;&gt;  2) + ~0U)) &gt;&gt; 30) &amp;  0x2;
+    r |= t, u &gt;&gt;= t;
+
+    <span style=color:#00f>return</span> (r | (u &gt;&gt; 1));
+}
+</code></pre></div></li>
+</ul>
+<h3 id=位运算推荐资料>位运算推荐资料</h3>
+<ol>
+<li>
+<p>《Hacker&rsquo;s Delight》这本书里面介绍了很多高效的算法</p>
+</li>
+<li>
+<p>《Matters Computational》有一章专门介绍各种bitwise算法</p>
+</li>
+<li>
+<p><a href=https://graphics.stanford.edu/~seander/bithacks.html>https://graphics.stanford.edu/~seander/bithacks.html</a></p>
+</li>
+</ol>
+<h3 id=浮点数>浮点数</h3>
+<p>十进制小数转二进制小数：整数部分和二进制整数转换方法相同，小数部分采用“乘二取整”，也就是小数部分每次乘2，然后取个位数作为二进制小数对应位的数字，再拿结果中剩下的小数部分继续乘2，直到小数部分为0或者满足精度为止。这种表示方法被称作定点表示法。</p>
+<p>IEEE的浮点数表示，浮点数格式为$(-1)^s \times M \times 2^E$​，其中s表示符号位，M为1～$2-\epsilon$​，被称为尾数，E被称为阶数。</p>
+<h2 id=datalab>DataLab</h2>
+<p><a href=http://www.cs.cmu.edu/afs/cs/academic/class/15213-f02/www/daemons/dlcontest.html>此处</a>有datalab 2002年的排行榜，其中包含当前最新实验的部分问题，给出了最少的操作数，仅供参考。</p>
+<p>大部分问题的思路都是对数字划分不同的情况分别进行处理</p>
+<h3 id=istmax>isTmax</h3>
+<p>利用0x7fffffff+1 == 0x80000000再相互异或为0的性质进行判断，但是-1(0xffffffff)也满足这个性质，因为!(-1+1) = 1，而!(0x7fffffff+1)=0，因此可以利用这个性质。</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>!(~(x + !(x + 1)) ^ (x + 1))
+</code></pre></div><h3 id=islessorequal>isLessOrEqual</h3>
+<p>less分为两种情况，一种是符号位相同，只需比较x-y &lt; 0，另一种是符号位不同，比较符号位即可。</p>
+<p>equal使用!(x^y)判断。为了减少操作数，取符号数的移位操作可以放到最后再执行</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>  <span style=color:#2b91af>int</span> res = x ^ y;
+  <span style=color:#2b91af>int</span> flag1 = (~res) &amp; (x + ~y + 1); <span style=color:green>// 符号相同，判断x-y &lt; 0
+</span><span style=color:green></span>  <span style=color:#2b91af>int</span> flag2 = x &amp; (~y); <span style=color:green>// 符号不同，判断符号
+</span><span style=color:green></span>  <span style=color:#2b91af>int</span> equal = !res;
+  <span style=color:#00f>return</span> equal | ((flag1 | flag2) &gt;&gt; 31 &amp; 1);
+</code></pre></div><h3 id=logicalneg>logicalNeg</h3>
+<p>初始版本</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>  <span style=color:#2b91af>int</span> sign = (x &gt;&gt; 31) &amp; 1; <span style=color:green>// 判断是否是负数
+</span><span style=color:green></span>  <span style=color:#2b91af>int</span> nonzero = ((x ^ (~x + 1)) &gt;&gt; 31) &amp; 1; <span style=color:green>// 判断是否为0
+</span><span style=color:green></span>  <span style=color:#00f>return</span> (~(sign | nonzero)) &amp; 1; <span style=color:green>// 判断符号位
+</span></code></pre></div><p>合并右移符号</p>
+<p>最终版本</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>  <span style=color:#2b91af>int</span> res = x ^ (~x + 1); 
+  <span style=color:#00f>return</span> (~(res | x) &gt;&gt; 31) &amp; 1;
+</code></pre></div><h3 id=howmanybits>howManyBits</h3>
+<p>思路：首先求得x的绝对值abs，然后计算abs的为1的最高位的索引，由于求出的索引是从0开始的，需要先加上1，然后分情况讨论：</p>
+<ol>
+<li>
+<p>如果x是正数，则需要多一个符号位</p>
+</li>
+<li>
+<p>如果x是0，则不需要符号位</p>
+</li>
+<li>
+<p>如果x是负数，当求出来的索引对应的负数大于x本身时，需要向前再多一位，也即</p>
+<p>-(1 &#171; idx) > x，等价于(x + (1 &#171; idx)) &lt; 0</p>
+</li>
+<li>
+<p>如果x是Tmin，由于int的范围是Tmin &lt;= x &lt;= -Tmin + 1，因此绝对值会超出范围，所以需要单独讨论，如果是Tmin就返回32</p>
+</li>
+</ol>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>int</span> howManyBits(<span style=color:#2b91af>int</span> x) {
+    <span style=color:#2b91af>int</span> mask = (x &gt;&gt; 31);
+    <span style=color:#2b91af>int</span> positive = ((!!x) &amp; !(mask &amp; 1));
+    <span style=color:#2b91af>int</span> abs = (x + mask) ^ mask; <span style=color:green>// 绝对值
+</span><span style=color:green></span>    <span style=color:#2b91af>int</span> idx = 0, tmp = 0;
+    <span style=color:#2b91af>int</span> isMin = !(x ^ (1 &lt;&lt; 31));
+
+    <span style=color:green>// 计算最高位的索引
+</span><span style=color:green></span>    tmp = (~((abs &gt;&gt; 16) + ~0) &gt;&gt; 27) &amp; 0x10;
+    idx += tmp, abs &gt;&gt;= tmp;
+    tmp = (~((abs &gt;&gt; 8) + ~0) &gt;&gt; 28) &amp; 0x8;
+    idx += tmp, abs &gt;&gt;= tmp;
+    tmp = (~((abs &gt;&gt; 4) + ~0) &gt;&gt; 29) &amp; 0x4;
+    idx += tmp, abs &gt;&gt;= tmp;
+    tmp = (~((abs &gt;&gt; 2) + ~0) &gt;&gt; 30) &amp; 0x2;
+    idx += tmp, abs &gt;&gt;= tmp;
+    idx += (abs &amp; 0x02) &gt;&gt; 1;
+
+    isMin = ~isMin + 1;
+
+    <span style=color:#00f>return</span> (isMin &amp; 32) + (~isMin &amp; (idx + (positive | ((x + (1 &lt;&lt; idx)) &gt;&gt; 31 &amp; 1)) + 1)); 
+}
+</code></pre></div>
+</div>
+<div class=tags>
+</div></div>
+</div>
+<div class="footer wrapper">
+<nav class=nav>
+<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
+</nav>
+</div>
+<script>feather.replace()</script>
+</body>
+</html>
