@@ -3,6 +3,7 @@ title: "cs:app 第二章 & datalab实验记录"
 date: 2021-08-11T14:27:13+08:00
 toc: true
 mathjax: true
+description:  "常见位运算和IEEE784浮点数格式介绍，以及datalab部分问题的思路和代码"
 ---
 
 ## 阅读笔记
