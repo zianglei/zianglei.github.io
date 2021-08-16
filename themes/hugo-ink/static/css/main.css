@@ -105,6 +105,7 @@ textarea {
 blockquote {
     margin-left: 1rem;
     font-style: italic;
+	color: #878787;
     font-size: 1.4rem;
     font-family: Georgia,bitstream charter,serif;
     border-left: 3px solid;
@@ -119,6 +120,10 @@ blockquote cite {
 
 blockquote em {
     font-weight: 600;
+}
+
+strong {
+	color: #ff4500;
 }
 
 
