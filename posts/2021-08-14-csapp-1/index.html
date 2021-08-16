@@ -352,7 +352,7 @@ n |= (n &gt;&gt; 16);
 <p>同样是分类讨论，如果是非规格化的，由于最小都是$2^{-127}$，直接返回0。</p>
 <p>如果是规格化，如果e &lt; 127，则表明e-bias &lt; 0，是一个小于1的数字，返回0。</p>
 <p>计算出阶数后，如果阶数>30，则表明超出int的范围（对于-Tmin = -2^31，返回的正好是1&#171;31）</p>
-<p>然后对frac进行处理，首先将frac扩充成31位小数（因为转换为int包含一个符号位），并加上隐含的1。然后根据阶数生成mask，对超出e之后的取0，然后将frac转换成整数，下图展现了frac的变化情况。</p>
+<p>然后对frac进行处理，首先将frac加上隐含的1，并扩充成31位小数（不是32位是因为转换为int包含一个符号位）。然后根据阶数生成mask，对超出e之后的取0，然后将frac转换成整数，下图展现了frac的变化情况。</p>
 <p><img src=./float2int-frac.png alt></p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>int</span> floatFloat2Int(<span style=color:#2b91af>unsigned</span> uf) {
   <span style=color:#2b91af>unsigned</span> e = (uf &gt;&gt; 23) &amp; 0xffu;
