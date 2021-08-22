@@ -1,5 +1,5 @@
 ---
-title: "csapp 第三章 & bomb lab记录"
+title: "cs:app 第三章 & bomb lab记录"
 date: 2021-08-17T10:22:36+08:00
 toc: true
 mathjax: true
