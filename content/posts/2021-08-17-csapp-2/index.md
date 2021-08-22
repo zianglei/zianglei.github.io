@@ -6,6 +6,8 @@ mathjax: true
 description:  x86-64汇编语言学习，人肉翻译汇编拆“炸弹”
 ---
 
+[这里](https://github.com/zianglei/csapp-labs)可以找到实验代码
+
 ## 程序代码的汇编表示
 
 ### 寄存器

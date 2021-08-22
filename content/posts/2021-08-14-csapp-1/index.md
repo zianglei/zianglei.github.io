@@ -6,6 +6,8 @@ mathjax: true
 description:  "常见位运算和IEEE784浮点数格式介绍，以及datalab部分问题的思路和代码"
 ---
 
+[这里](https://github.com/zianglei/csapp-labs)可以找到实验代码
+
 ## 阅读笔记
 
 ### 字长
