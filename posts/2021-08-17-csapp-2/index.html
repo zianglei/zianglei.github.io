@@ -1,19 +1,19 @@
 <!doctype html><html>
 <head>
 <meta charset=utf-8>
-<meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第三章 & bomb lab记录 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
-<meta itemprop=name content="cs:app 第三章 & bomb lab记录">
+<meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第三章 & bomblab 记录 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
+<meta itemprop=name content="cs:app 第三章 & bomblab 记录">
 <meta itemprop=description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><meta itemprop=datePublished content="2021-08-17T10:22:36+08:00">
 <meta itemprop=dateModified content="2021-08-17T10:22:36+08:00">
-<meta itemprop=wordCount content="2797">
-<meta itemprop=keywords content><meta property="og:title" content="cs:app 第三章 & bomb lab记录">
+<meta itemprop=wordCount content="2800">
+<meta itemprop=keywords content><meta property="og:title" content="cs:app 第三章 & bomblab 记录">
 <meta property="og:description" content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://lza852.com/posts/2021-08-17-csapp-2/"><meta property="article:section" content="posts">
 <meta property="article:published_time" content="2021-08-17T10:22:36+08:00">
 <meta property="article:modified_time" content="2021-08-17T10:22:36+08:00">
 <meta name=twitter:card content="summary">
-<meta name=twitter:title content="cs:app 第三章 & bomb lab记录">
+<meta name=twitter:title content="cs:app 第三章 & bomblab 记录">
 <meta name=twitter:description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”">
 <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css>
 <link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css>
@@ -52,7 +52,7 @@
 </div>
 </div>
 <div class=matter>
-<h1 class=title>cs:app 第三章 & bomb lab记录</h1>
+<h1 class=title>cs:app 第三章 & bomblab 记录</h1>
 </div>
 </div>
 <div>
@@ -132,7 +132,9 @@
 <h3 id=栈帧>栈帧</h3>
 <p><img src=x86-64-stack.png style=zoom:50%></p>
 <p>x86-64提供六个寄存器用于函数参数传递（%rdi, %rsi, %rdx, %rcx, %r8, %r9），每一个调用的函数都会事先在栈上开辟空间，填入需要存储的变量。</p>
-<p>如果函数需要的参数非常多，六个寄存器不够放，那么就需要在调用者的栈中另外开辟空间，如图中的参数7至参数n，然后在被调用函数Q中指定</p>
+<p>如果函数需要的参数非常多，六个寄存器不够放，那么就需要在调用者的栈中另外开辟空间，如图中的参数7至参数n，然后在被调用函数Q中指定。</p>
+<p>对于一些变长栈帧，gcc还会在返回地址下面保存%rbp（base pointer），用于保存之前的%rbp寄存器值，然后将%rbp指向新的栈底。</p>
+<p>当进入新的函数时（call指令），返回地址在内存中的地址是%rsp</p>
 <h3 id=结构体>结构体</h3>
 <p>对于</p>
 <p><img src=struct.png alt></p>
