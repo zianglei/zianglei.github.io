@@ -2,13 +2,10 @@
 title: "cs:app attacklab 记录"
 date: 2021-08-23T08:35:00+08:00
 toc: true
+description: "这一部分在cs:app书籍中只有两小节，却单独有一个lab"
 categories:
 - cs:app
 ---
-
-这一部分在cs:app书籍中只有两小节，却单独有一个lab
-
-<!--more-->
 
 代码[在此](https://github.com/zianglei/csapp-labs)
 
