@@ -5,7 +5,7 @@
 <meta itemprop=name content="cs:app 第三章 & bomblab 记录">
 <meta itemprop=description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><meta itemprop=datePublished content="2021-08-17T10:22:36+08:00">
 <meta itemprop=dateModified content="2021-08-17T10:22:36+08:00">
-<meta itemprop=wordCount content="2800">
+<meta itemprop=wordCount content="2805">
 <meta itemprop=keywords content><meta property="og:title" content="cs:app 第三章 & bomblab 记录">
 <meta property="og:description" content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”">
 <meta property="og:type" content="article">
@@ -125,6 +125,7 @@
 <p>sub S,D -> D = D - S</p>
 <h4 id=数据传送>数据传送</h4>
 <p>mov S,D -> D = S</p>
+<p>注意movl传送四字节，会将高位四字节设置为0，这样是因为 x86-64 的惯例是任何为寄存器生成 32 位值的指令都会把该寄存器的高位部分置成0。</p>
 <h4 id=读取有效地址>读取有效地址</h4>
 <p>lea并不会从指定地址读取数据到目的位置，而是将地址存储到目的位置</p>
 <h4 id=操作数指示符>操作数指示符</h4>

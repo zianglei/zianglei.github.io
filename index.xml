@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Justin Lei</title><link>https://lza852.com/</link><description>Recent content on Justin Lei</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© Justin Lei</copyright><lastBuildDate>Tue, 17 Aug 2021 10:22:36 +0800</lastBuildDate><atom:link href="https://lza852.com/index.xml" rel="self" type="application/rss+xml"/><item><title>cs:app 第三章 &amp; bomblab 记录</title><link>https://lza852.com/posts/2021-08-17-csapp-2/</link><pubDate>Tue, 17 Aug 2021 10:22:36 +0800</pubDate><guid>https://lza852.com/posts/2021-08-17-csapp-2/</guid><description>这里可以找到实验代码
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Justin Lei</title><link>https://lza852.com/</link><description>Recent content on Justin Lei</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© Justin Lei</copyright><lastBuildDate>Mon, 23 Aug 2021 08:35:00 +0800</lastBuildDate><atom:link href="https://lza852.com/index.xml" rel="self" type="application/rss+xml"/><item><title>cs:app attacklab 记录</title><link>https://lza852.com/posts/2021-08-23-csapp-3/</link><pubDate>Mon, 23 Aug 2021 08:35:00 +0800</pubDate><guid>https://lza852.com/posts/2021-08-23-csapp-3/</guid><description>这一部分在cs:app书籍中只有两小节，却单独有一个lab
+常见的攻击方式 缓存区溢出 由于C不对数组边界进行检查，当在栈上为数组分配空间时，如果写入的数据超过了数组空间，就会覆盖栈中存储的状态信息。通常使用字符串缓存区溢出来实现。
+char *gets(char* s) { int c; char *dest = s; // 没有对边界进行检查 while ((c = getchar()) != &amp;#39;\n&amp;#39; &amp;amp;&amp;amp; c != EOF) *dest++ = c; if (c == EOF &amp;amp;&amp;amp; dest == s) return NULL; *dest++ = &amp;#39;\0&amp;#39;; return s; } 生成的汇编代码如下
+echo: subq $24, %rsp movq %rsp, %rdi call gets movq %rsp, %rdi call puts addq $24, %rsp ret 根据汇编代码可以看出，函数分配了24字节的栈空间，因此如果写入的字符串超过了24个字符，那么栈中的返回地址就会被覆盖；如果超过了32字节（24+8），那么调用者中保存的状态也会被覆盖。（栈中保存的数据格式参考这里）
+攻击形式 可以在溢出的字符串中包含指向特定可执行代码的指针，用来覆盖返回地址，那么就可以在函数结束后跳转到指定的函数执行。
+对抗方法 栈随机化</description></item><item><title>cs:app 第三章 &amp; bomblab 记录</title><link>https://lza852.com/posts/2021-08-17-csapp-2/</link><pubDate>Tue, 17 Aug 2021 10:22:36 +0800</pubDate><guid>https://lza852.com/posts/2021-08-17-csapp-2/</guid><description>这里可以找到实验代码
 程序代码的汇编表示 寄存器 整数寄存器 条件码寄存器 CF：进位标志，表示最高位产生了进位 ZF：零标志，最近的操作结果为0 SF：符号标志，最近的操作结果为负数 OF：溢出标志，导致补码溢出，正溢出或负溢出 栈寄存器 栈指针%rsp保存栈顶元素的数据，将数据压入栈是将%rsp-8，然后存储数据；弹出栈是将M[%rsp]取出，然后%rsp+8。
 编译器会为每个函数计算需要的栈空间，然后在函数的开头对%rsp进行减操作，分配栈空间，在函数结束返回的时候对%rsp加操作，恢复栈空间
 pc寄存器 %rip代表指令计数器，表示当前执行指令的地址
@@ -10,6 +15,7 @@ Intel省略了指示大小的后缀，例如l，q等 Intel省略了寄存器的�
 算术运算 add S,D -&amp;gt; D = D + S
 sub S,D -&amp;gt; D = D - S
 数据传送 mov S,D -&amp;gt; D = S
+注意movl传送四字节，会将高位四字节设置为0，这样是因为 x86-64 的惯例是任何为寄存器生成 32 位值的指令都会把该寄存器的高位部分置成0。
 读取有效地址 lea并不会从指定地址读取数据到目的位置，而是将地址存储到目的位置
 操作数指示符 栈帧 x86-64提供六个寄存器用于函数参数传递（%rdi, %rsi, %rdx, %rcx, %r8, %r9），每一个调用的函数都会事先在栈上开辟空间，填入需要存储的变量。</description></item><item><title>cs:app 第二章 &amp; datalab实验记录</title><link>https://lza852.com/posts/2021-08-14-csapp-1/</link><pubDate>Wed, 11 Aug 2021 14:27:13 +0800</pubDate><guid>https://lza852.com/posts/2021-08-14-csapp-1/</guid><description>这里可以找到实验代码
 阅读笔记 字长 字长（word size）指的是指针数据的大小，也就是内存一次周期能读取到的数据长度。通常我们说的32bits/64bits就指的是字长。但是在微软API里面，定义WORD为16bits（为了对应Intel 8086最开始的时候16bits的字长），还有DWORD（32bits）和QWORD（64bits）。
