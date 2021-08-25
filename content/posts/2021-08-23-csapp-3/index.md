@@ -8,6 +8,10 @@ categories:
 
 这一部分在cs:app书籍中只有两小节，却单独有一个lab
 
+<!--more-->
+
+代码[在此](https://github.com/zianglei/csapp-labs)
+
 ## 常见的攻击方式
 
 ### 缓存区溢出

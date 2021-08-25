@@ -1,5 +1,5 @@
 ---
-title: "cs:app 第二章 & datalab实验记录"
+title: "cs:app 第二章 & datalab 记录"
 date: 2021-08-11T14:27:13+08:00
 toc: true
 mathjax: true
