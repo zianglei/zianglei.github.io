@@ -1,0 +1,241 @@
+<!doctype html><html>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第五章 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
+<meta itemprop=name content="cs:app 第五章">
+<meta itemprop=description content="程序优化的奇技淫巧"><meta itemprop=datePublished content="2021-08-31T10:31:13+08:00">
+<meta itemprop=dateModified content="2021-08-31T10:31:13+08:00">
+<meta itemprop=wordCount content="620">
+<meta itemprop=keywords content><meta property="og:title" content="cs:app 第五章">
+<meta property="og:description" content="程序优化的奇技淫巧">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://lza852.com/posts/2021-08-31-csapp-5/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-08-31T10:31:13+08:00">
+<meta property="article:modified_time" content="2021-08-31T10:31:13+08:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="cs:app 第五章">
+<meta name=twitter:description content="程序优化的奇技淫巧">
+<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css>
+<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css>
+<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/main.css>
+<link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
+<script src=https://lza852.com/js/feather.min.js></script>
+<script src=https://lza852.com/js/main.js></script>
+</head>
+<body>
+<div class="container wrapper">
+<div class=header>
+<div class=avatar>
+<a href=https://lza852.com/>
+<img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
+</a>
+</div>
+<h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1>
+<div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
+</nav>
+</div>
+<nav class=nav>
+<ul class=flat>
+</ul>
+</nav>
+</div>
+<div class=post>
+<div class=post-header>
+<div class=meta>
+<div class=date>
+<span class=day>31</span>
+<span class=rest>Aug 2021</span>
+</div>
+</div>
+<div class=matter>
+<h1 class=title>cs:app 第五章</h1>
+</div>
+</div>
+<div>
+<nav id=TableOfContents>
+<ul>
+<li><a href=#优化程序性能>优化程序性能</a>
+<ul>
+<li><a href=#内存别名使用>内存别名使用</a></li>
+<li><a href=#程序性能的表示>程序性能的表示</a></li>
+<li><a href=#对循环代码进行优化>对循环代码进行优化</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+<hr>
+<div class=markdown>
+<h2 id=优化程序性能>优化程序性能</h2>
+<h3 id=内存别名使用>内存别名使用</h3>
+<p>对于下面两个函数来说，执行相同的功能，但是在 twiddle2 效率更高一点（twiddle2 只执行 3 次内存引用，而 twiddle1 需要 6 次），在编译器优化的时候，可能不会把 twiddle1 优化为 twiddle 2</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> twiddle1(<span style=color:#2b91af>long</span> *xp, <span style=color:#2b91af>long</span> *yp) {
+  *xp += *yp;
+  *xp += *yp;
+}
+
+<span style=color:#2b91af>void</span> twiddle2(<span style=color:#2b91af>long</span> *xp, <span style=color:#2b91af>long</span> *yp) {
+  *xp += 2* *yp;
+}
+</code></pre></div><p>那是因为有可能 xp == yp, 这样 twiddle1 会将 xp 的值增加 4 倍，而 twiddle2 会将 xp 的值增加 3 倍，这种情况叫做内存别名使用，因此编译器在进行安全的优化的时候必须假设指针有可能相同。</p>
+<p>而对于那些具有副作用的函数（例如修改全局变量），GCC 总是假设函数会有副作用，保持所有的函数调用不变。</p>
+<h3 id=程序性能的表示>程序性能的表示</h3>
+<p>CPE （ 每元素的周期数）可以表明一个程序的性能，对于一个数组循环来说，不同形式的循环通过最小二乘拟合得到的线性公式的系数（斜率）会有所差别，我们把这个斜率就叫做<strong>每元素的周期数</strong>。</p>
+<p>例如</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> psum1(<span style=color:#2b91af>float</span> a[], <span style=color:#2b91af>float</span> p[], <span style=color:#2b91af>long</span> n) {
+  <span style=color:#2b91af>long</span> i;
+  p[0] = a[0];
+  <span style=color:#00f>for</span>(i = 1; i &lt; n; ++i)
+    p[i] = p[i - 1] + a[i];
+}
+
+<span style=color:#2b91af>void</span> psum2(<span style=color:#2b91af>float</span> a[], <span style=color:#2b91af>float</span> p[], <span style=color:#2b91af>long</span> n) {
+  <span style=color:#2b91af>long</span> i;
+  p[0] = a[0];
+  <span style=color:#00f>for</span> (i = 1; i &lt; n - 1; i += 2) {
+    <span style=color:#2b91af>float</span> mid_val = p[i - 1] + a[i];
+    p[i] = mid_val;
+    p[i + 1] = mid_val + a[i + 1];
+  }
+  
+ 	<span style=color:#00f>if</span> (i &lt; n) 
+    p[i] = p[i - 1] + a[i];
+}
+</code></pre></div><p>统计两个函数的在不同 n 的情况下的执行周期可以得到 psum1 的运行时间近似为 368 + 9.0n， psum2 的运行时间近似为 368 + 6.0n，因此 psum2 的 CPE 为 6.0，psum1 的 CPE 为 9.0</p>
+<h3 id=对循环代码进行优化>对循环代码进行优化</h3>
+<p>初始代码</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine1(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  *dest = IDENT;
+  
+  <span style=color:#00f>for</span>(<span style=color:#2b91af>int</span> i = 0; i &lt; vec_length(v); ++i) {
+    data_t val;
+    get_vec_element(v, i, &amp;val);
+    *dest = *dest OP val;
+  }
+}
+
+<span style=color:#2b91af>int</span> get_vec_element(vec_ptr v, <span style=color:#2b91af>long</span> index, data_t *index) {
+  <span style=color:#00f>if</span> (index &lt; 0 || index &gt;= v-&gt;len)
+    <span style=color:#00f>return</span> 0;
+  *dest = v-&gt;data[index];
+  <span style=color:#00f>return</span> 1;
+}
+</code></pre></div><h4 id=代码移动>代码移动</h4>
+<p>代码移动用于消除循环的低效率。识别出在循环里或者会多次执行但是计算结果不会发生改变的计算，将计算移动到代码前面不会被多次求值的部分。</p>
+<p>例如在循环条件判断的时候重复求得数组或者字符串的长度，就可以将计算长度的代码移动到循环之前，存储到变量中。</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine2(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  <span style=color:#2b91af>long</span> length = vec_length(v);
+  
+  *dest = IDENT;
+  
+  <span style=color:#00f>for</span>(<span style=color:#2b91af>int</span> i = 0; i &lt; length; ++i) {
+    data_t val;
+    get_vec_element(v, i, &amp;val);
+    *dest = *dest OP val;
+  }
+}
+</code></pre></div><h4 id=减少过程调用>减少过程调用</h4>
+<p>过程调用会带来开销，在循环中每次都调用 get_vec_element 来获取下一个向量元素。对于每一个元素，都要把向量索引 i 与循环边界进行比较，会造成低效率。作为替代，可以在循环之前获得数组的起始位置。由于知道循环不会超出数组的边界，因此直接读取数组元素值即可。</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine3(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  <span style=color:#2b91af>long</span> length = vec_length(v);
+  data_t* data= get_vec_start(v);
+  
+  *dest = IDENT;
+  
+  <span style=color:#00f>for</span>(<span style=color:#2b91af>int</span> i = 0; i &lt; length; ++i) {
+    *dest = *dest OP data[i];
+  }
+}
+</code></pre></div><p>但是经过统计程序性能并没有提升，因此内循环的其他地方形成了瓶颈。</p>
+<p>为什么性能并没有提升，是因为在调用 get_vec_element 的时候，处理器总是预测索引不会超出边界的分支，因此不会导致预测错误处罚。</p>
+<h4 id=消除不必要的内存引用>消除不必要的内存引用</h4>
+<p>combine3 函数将结果累积在 *dest 内存位置，每次循环调用都会先从内存中读出数据，然后计算后再写入。为了消除不必要的内存读写，我们可以用临时变量存储计算值，然后再一次写入内存</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine4(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  <span style=color:#2b91af>long</span> length = vec_length(v);
+  data_t* data = get_vec_start(v);
+  <span style=color:#2b91af>long</span> acc = IDENT;
+  
+  <span style=color:#00f>for</span>(<span style=color:#2b91af>int</span> i = 0; i &lt; length; ++i) {
+    acc = acc OP data[i];
+  }
+  *dest = acc;
+}
+</code></pre></div><p>相比 combine 3，combine 4 的效率提高了 2～7 倍，整数加法情况下 CPE下降到了 1.27 个时钟周期。</p>
+<h4 id=利用处理器结构>利用处理器结构</h4>
+<p><strong>延迟界限</strong>代表一个运算单元严格完整执行一个操作的完整时间。例如处理器中的乘法单元有三级流水，那么它的延迟就是 3， 代表没有流水化条件下的执行延迟。</p>
+<p><strong>吞吐界限</strong>代表完全流水化之后的最大执行指令数目，例如处理器有两个浮点乘法单元，它们的发射时间都为 1，则在完全流水化条件下，整个处理器的吞吐量为 1 / 2 = 0.5，即每个操作占用 0.5 个时钟周期，突破 1 的界限，这种结构称之为超标量设计。吞吐量界限给出了 CPE 的最小界限。</p>
+<h4 id=循环展开>循环展开</h4>
+<p>循环展开通过增加每次迭代时计算元素的数量，减少循环的迭代次数。</p>
+<p>当将循环次数按照 k X m 展开时，表示将循环次数减少 k 倍，每次计算 m 个元素。例如按照 2 X 1 循环展开</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine5(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  <span style=color:#2b91af>long</span> length = vec_length(v);
+  <span style=color:#2b91af>long</span> limit = length - 1;
+  data_t *data = get_vec_start(v);
+  data_t acc = IDENT;
+  
+  <span style=color:#00f>for</span>(i = 0; i &lt; limit; i += 2) {
+    acc = (acc OP data[i]) OP data[i + 1];
+  }
+  
+  <span style=color:#00f>for</span>(; i &lt; length; i++) {
+    acc = acc OP data[i];
+  }
+  *data = acc;
+}
+</code></pre></div><p>按照 2 X 1 展开，对于整数加法，得到的 CPE 会比 combine4 小，已经达到延迟界限，这样做得益于减少了循环开销。而其他情况并没有显著减小 CPE，已经达到了延迟界限。</p>
+<p><img src=combine5-perf.png alt></p>
+<p>对 combine 5 2 X 1 展开生成的汇编代码进行分析数据流程图，如下：</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>.L35:
+vmulsd (%rax, %rdx, 8), %xmm0, %xmm0
+vmulsd 8(%rax, %rdx, 8), %xmm0, %xmm0
+addq $2, %rdx
+cmpq %rdx, %rbp
+jg .L35
+</code></pre></div><p><img src=combine5-seq1.png alt></p>
+<p><img src=combine5-seq2.png alt></p>
+<p>可以看到每次计算都要走两次乘法，总共还是 n 个乘法操作，所以并不会低于延迟界限。</p>
+<p>由于 acc 被放在 %xmm0 寄存器里，因此每一次乘法都要等待上次计算完成之后才会执行。所以为了提高并行性，利用多个乘法单元，我们可以使用多个累积变量进行操作。</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>void</span> combine6(vec_ptr v, data_t *dest) {
+  <span style=color:#2b91af>long</span> i;
+  <span style=color:#2b91af>long</span> length = vec_length(v);
+  <span style=color:#2b91af>long</span> limit = length - 1;
+  data_t *data = get_vec_start(v);
+  data_t acc0 = IDENT;
+  data_t acc1 = IDENT;
+  
+  <span style=color:#00f>for</span>(i = 0; i &lt; limit; i += 2) {
+    acc0 = acc0 OP data[i];
+    acc1 = acc1 OP data[i+1];
+  }
+  
+  <span style=color:#00f>for</span>(; i &lt; length; i++) {
+    acc0 = acc0 OP data[i];
+  }
+  *data = acc0 OP acc1;
+}
+</code></pre></div><p>这样的两次循环展开和两路合并，称之为 2X2 循环展开。最终性能测试 CPE 打破了延迟界限的限制，每个关键路径只包含 n / 2 个操作。如果执行 k X k 此循环展开，那么当 k 值足够大的时候，CPE 就会逼近吞吐极限。</p>
+<p>因此只要保证该操作所有功能单元的流水线都是满的，程序才能达到这个操作的吞吐量界限。对延迟为 L、容量为 C 的操作而言，要求循环展开因子 k >= C * L。</p>
+<h4 id=重新结合变换>重新结合变换</h4>
+<p>对于 combine5 而言，如果我们利用结合定律将 ( data[i] OP data[i+1] ) 先计算，称为 combine7，CPE 性能会缩小 2 倍</p>
+<p><img src=combine7.png alt></p>
+<p>分析关键路径可知只有一个 mul 操作会循环使用寄存器</p>
+<p><img src=combine7-seq1.png alt=image-20210901111523119></p>
+<p>但是对于这种重新结合变换，要注意在浮点数加法和乘法的时候，有可能会发生舍入或者溢出，因此不一定能够使用重新结合变换的方式</p>
+</div>
+<div class=tags>
+</div></div>
+</div>
+<div class="footer wrapper">
+<nav class=nav>
+<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
+</nav>
+</div>
+<script>feather.replace()</script>
+</body>
+</html>
