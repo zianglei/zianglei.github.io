@@ -1,8 +1,9 @@
 ---
-title: "CS110L Week 1 笔记"
+title: "CS110L Week 1"
 date: 2021-09-02T12:29:46+08:00
 tags:
 - Rust
+- CS110L
 categories: 
 - Course 
 toc: true
