@@ -30,7 +30,7 @@ for entry in fs::read_dir(fd_path).ok()? {
 }
 ```
 
-注意在 Proxmox 虚拟机中，每个进程会多出 19 和 99 两个文件描述符，查看它们指向的描述符分别是 /dev/ptmx 和 vscode remote 创建的文件。
+注意在使用 vscode remote 远程连接时，每个进程会多出 19 和 99 两个文件描述符，查看它们指向的描述符分别是 /dev/ptmx 和 vscode remote 创建的文件。
 
 /dev/ptmx 是 Linux 的伪终端，当打开时，会自动创建 master 和 slave（slave 位于 /dev/pts/ 下），为了实现虚拟化的目标，伪终端模拟器通过master发送键盘输入，bash 等终端进程通过 slave 接收，然后将执行结果通过 slave 发送，伪终端模拟器通过 master 接收处理结果，显示到显示器上。
 
