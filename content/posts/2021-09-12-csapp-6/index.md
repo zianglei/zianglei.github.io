@@ -1,7 +1,6 @@
 ---
 title: "cs:app 第六章 & cachelab 记录"
 date: 2021-09-12T13:36:31+08:00
-draft: true
 toc: true
 tags: 
 - cs:app
