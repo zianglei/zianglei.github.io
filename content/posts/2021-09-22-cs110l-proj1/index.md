@@ -1,6 +1,11 @@
 ---
 title: "CS110L Proj-1: DEET 简易调试器"
 date: 2021-09-22T17:17:00+08:00
+tags:
+- Rust
+- CS110L
+categories:
+- Course
 toc: true
 description: gdb 的精简版
 ---
