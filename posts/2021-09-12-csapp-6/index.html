@@ -5,7 +5,7 @@
 <meta itemprop=name content="cs:app 第六章 & cachelab 记录">
 <meta itemprop=description content="利用缓存加快程序对某个地方的“痛击”👊"><meta itemprop=datePublished content="2021-09-12T13:36:31+08:00">
 <meta itemprop=dateModified content="2021-09-12T13:36:31+08:00">
-<meta itemprop=wordCount content="246">
+<meta itemprop=wordCount content="261">
 <meta itemprop=keywords content="cs:app,"><meta property="og:title" content="cs:app 第六章 & cachelab 记录">
 <meta property="og:description" content="利用缓存加快程序对某个地方的“痛击”👊">
 <meta property="og:type" content="article">
@@ -117,6 +117,9 @@
 <p><img src=general-cache.png alt></p>
 <p>每个高速缓存可以用（S、E、B、m）四元组表示，高速缓存的大小 $C = S \times E \times B$，E 为每组包含的高速缓存行（cache line）的行数。</p>
 <p>根据四元组不同的值，高速缓存也可以被分为不同的类型</p>
+<blockquote>
+<p>为什么要用中间的位作为组索引，而不是用高位来做索引？是因为如果用高位做索引，一些连续的内存块就会映射到相同的高速缓存块中。如果一个程序有良好的局部性，那么就会导致高速缓存块的使用率会很低。</p>
+</blockquote>
 <h4 id=直接相连高速缓存>直接相连高速缓存</h4>
 <p>E = 1，每组只有一行 cache line。当 CPU 执行读内存地址 w 时，会在缓存内将地址划分成标记、组索引和块偏移三部分，并确认是否缓存命中🎯</p>
 <ol>
@@ -175,7 +178,7 @@
 	L 04f6b868,8
 	S 7ff0005c8,8
 </code></pre></div><p>表示 operation、address、size，M 表示数据更改，L 表示读取数据，S 表示写入数据，I 表示指令读取。</p>
-<p>csim 需要支持上述三种缓存架构存储器，支持多种参数</p>
+<p>csim 需要支持上述三种缓存架构存储器，支持指定 set_index, block_index 和 associativity （每个集合中有几个缓存行），注意 associativity 指定的 line 只是可以用来创建动态数组，在缓存地址中不存在 line 这个部分，只包含 set_index、block_index 和 tag</p>
 <h4 id=定义结构体>定义结构体</h4>
 <p>为了模拟缓存，我们需要定义 cache 各级的结构，在此处定义 cache_t、set_t、line_t ，每个 line_t 代表一个 block，表示一个 cache line。</p>
 <p>为了支持不同结构的 cache，cache_t 相关数据结构都使用动态分配，并注意在释放内存的需要检查是否分配，如果没分配就跳过释放。</p>
