@@ -1,7 +1,6 @@
 ---
 title: "PVE 6.4 AMD RX6600XT WIN10 显卡直通记录"
 date: 2021-10-13T12:51:11+08:00
-draft: true
 toc: true
 ---
 
