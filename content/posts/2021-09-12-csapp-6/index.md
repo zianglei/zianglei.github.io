@@ -97,7 +97,7 @@ E = 1，每组只有一行 cache line。当 CPU 执行读内存地址 w 时，�
 
 #### 全相联高速缓存
 
-全相联高速缓存 E = C / B，即只有一个组，因此地址中没有组索引位。其索引的方式和组相连高速缓存类似，区别只是规模大小的问题。因为高速缓存碧玺并行地搜索许多相匹配的标记，因此全相联高速缓存只适用于做小的高速缓存，例如 TLB 等。
+全相联高速缓存 E = C / B，即只有一个组，因此地址中没有组索引位。其索引的方式和组相连高速缓存类似，区别只是规模大小的问题。因为高速缓存并行地搜索许多相匹配的标记，因此全相联高速缓存只适用于做小的高速缓存，例如 TLB 等。
 
 ### 写缓存
 
@@ -157,5 +157,42 @@ csim 需要支持上述三种缓存架构存储器，支持指定 set_index, blo
 
 为了模拟缓存，我们需要定义 cache 各级的结构，在此处定义 cache_t、set_t、line_t ，每个 line_t 代表一个 block，表示一个 cache line。
 
+```c
+struct line {
+    bool valid;
+    struct line *prev, *next;
+    ull tag;
+    uint8_t* block;
+};
+
+typedef struct line line_t;
+
+/**
+ * @brief one set in a cache
+ */
+typedef struct {
+    line_t* lines; 
+    line_t head, tail;
+} set_t;
+
+/**
+ * @brief a cache
+ */
+typedef struct {
+    set_t* sets;
+} cache_t;
+```
+
 为了支持不同结构的 cache，cache_t 相关数据结构都使用动态分配，并注意在释放内存的需要检查是否分配，如果没分配就跳过释放。
 
+由于在每个 cache 满的时候需要选择一个缓存线进行替换，因此每个 line_t 还需要包含两个指针形成双向链表，便于实现 LRU 算法
+
+#### 仿真过程
+
+由于 valgrind 产生的 trace 只包括 L、M、S 三种操作，整个仿真过程也就是围绕着这三个操作来分别处理。
+
+首先是判断 hit 的过程，在解析出地址对应的 set 编号、tag 后，就可以找到对应的 set_t，然后遍历这个 set 的所有 cache line，如果找到 tag 一致的，就表明 hit 了，注意 M 操作符下应该 hit 两次（等效于 load 和后面跟的 store 操作同一个地址）。如果没找到 tag 一致的，表明发生 miss，需要根据操作符进行讨论。
+
+1. L 操作符。Load 操作在 miss 情况下需要从低一级的 cache 中读取数据，并找到一个空的 cache line 放置数据，实际代码编写的时候只需要将该 cache line 的标志位设置为有效即可。如果没有空的 cache line，就需要使用 LRU 将最近最少使用的 cacheline 踢出去（eviction），将新的数据放在这个 cache line。
+2. S 操作符。和 Load 操作一样，根据文档中的描述和 csim-ref 的输出，写入操作使用的是写回，因此在 miss 的时候会使用写分配，即和 Load 操作一样从低一级的 cache 读取数据并写入 cache
+3. M 操作符。由于 Modify 操作等效于对同一个地址先进行 Load 操作，再进行 Store 操作，因此我们首先执行 Load 的 miss 操作，然后之后的 Store 操作一定会命中。
