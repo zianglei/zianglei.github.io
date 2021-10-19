@@ -1,7 +1,7 @@
 ---
 title: "CS110L Week 6"
 date: 2021-10-18T16:20:21+08:00
-draft: true
+description: 简易 parallel_map
 toc: true
 ---
 
