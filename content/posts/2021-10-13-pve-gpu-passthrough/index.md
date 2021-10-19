@@ -1,10 +1,11 @@
 ---
 title: "PVE 6.4 AMD RX6600XT WIN10 显卡直通记录"
 date: 2021-10-13T12:51:11+08:00
+description: 折磨的 43 代码，网上没看到很多关于 AMD 显卡的 PVE 直通配置参考
 toc: true
 ---
 
-PVE 做显卡直通经常出现错误代码 43 的情况，不出意外我也碰上了，下面是我的所有配置和操作步骤，也是折腾了半天，扒了很多论坛。虽然不知道哪个地方解决了问题，但是现在是能够正常工作，所以发出来供参考。
+PVE 做显卡直通经常出现错误代码 43 的情况，不出意外我也碰上了，下面是我的所有配置和操作步骤，也是折腾了半天，扒了很多论坛。虽然不知道哪个地方解决了问题，但是现在是能够稳定工作，所以发出来供参考。
 
 ## 主机配置
 
@@ -40,7 +41,7 @@ done;
 
 ### 打 vendor-reset 补丁
 
-这个是官方教程里面说 RX6XXX (XT) 系列会存在复位不正确的 bug，需要打这个 [vendor-reset](https://github.com/gnif/vendor-reset) 补丁，写在这里仅供参考，参考里面的说明进行安装即可。
+这个是官方教程里面说 RX6XXX (XT) 系列会存在复位不正确的 bug，需要打这个 [vendor-reset](https://github.com/gnif/vendor-reset) 补丁。这个补丁的说明文件里没有提到支持 RX6600XT，所以并不太清楚是否真的起作用，写在这里仅供参考。
 
 ### 创建 WIN10 虚拟机
 
@@ -59,7 +60,9 @@ echo 0 > rom
 
 ![](card-rom.png)
 
-然后将提取出来的rom（在上面代码里面是 image.rom）放到 /usr/share/kvm 路径下，然后在 win10 虚拟机的配置文件中加入 rom 文件，配置项完成如下
+然后将提取出来的rom（在上面代码的路径是 /tmp/image.rom）放到 /usr/share/kvm 路径下，然后在 win10 虚拟机的配置文件中的显卡 pci 配置项中加入 rom 文件。我的显卡是 RX6600XT，所以就改名成 RX6600XT.rom。
+
+完整的配置项如下：
 
 ```
 hostpci0: 0000:03:00,pcie=1,romfile=RX6600XT.rom,x-vga=1
