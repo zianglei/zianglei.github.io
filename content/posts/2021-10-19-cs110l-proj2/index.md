@@ -1,5 +1,5 @@
 ---
-title: "CS110L Project 2"
+title: "CS110L Proj-2: BalanceBeam 反向代理"
 date: 2021-10-19T12:42:33+08:00
 description: 非常非常迷你的 Nginx 精简版
 tags:

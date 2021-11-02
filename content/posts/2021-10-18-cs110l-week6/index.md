@@ -3,6 +3,9 @@ title: "CS110L Week 6"
 date: 2021-10-18T16:20:21+08:00
 description: 简易 parallel_map
 toc: true
+tags:
+- CS110L
+- Rust
 ---
 
 实现 parallel_map，使用多线程在向量上执行函数 F，返回所有执行结果
