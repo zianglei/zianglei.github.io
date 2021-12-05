@@ -204,7 +204,7 @@ ret
 <h4 id=level-2-1>level 2</h4>
 <p>为了实现跳转到 touch2 并传参，我们需要和 ctarget 一样，覆盖原本的返回地址为 gadget 1 地址，然后设置 %rdi 寄存器为 cookie 值。由于 farm 中没有提供直接将立即数赋给寄存器的指令，因此我们需要在栈中先写入 cookie 值，然后使用 pop 指令弹出。</p>
 <p>所以整个栈的结构是</p>
-<p><img src=phase4.png style=zoom:50%></p>
+<img src=phase4.png style=zoom:50%>
 <p>gadget 1 指令为 <code>popq %rax</code>， 将 cookie 值放入到寄存器中，然后 gadget 2 指令为 <code>mov %rax %rdi</code>。</p>
 <p>根据文档附录给的指令表格，在 rtarget 反汇编中搜索相关指令，找到 gadget 1 指令地址为 0x4019ab，gadget 2 指令地址为 0x4019a2。</p>
 <p>因此字符串的组成为</p>
@@ -215,7 +215,7 @@ ret
 <p>根据 ctarget 的 level 3 可知，cookie 值必须在 touch 3 函数地址的上方，这样才不会被覆盖。但是这样做很难将 %rdi 指向 cookie 值所在位置，绕不过 touch 3 函数地址。</p>
 <p><strong>而在 farm 原本的程序中，我们发现有一条完整的 lea 指令</strong>，即 <code>%rax = %rdi + %rsi</code>，因此我们可以借助这条指令最终将 %rdi 赋值为 base + offset 的形式，指向 cookie 所在位置</p>
 <p>根据 farm 提供的 gadget，整个栈的结构如图所示</p>
-<p><img src=phase5.png style=zoom:50%></p>
+<img src=phase5.png style=zoom:50%>
 <p>在执行 movq %rsp %rax 指令时，%rsp 指向的位置就是 base address，因此 offset 为 72，最后根据栈的指令设置相应字符串即可。</p>
 </div>
 <div class=tags>

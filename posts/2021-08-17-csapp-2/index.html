@@ -90,7 +90,7 @@
 <h2 id=程序代码的汇编表示>程序代码的汇编表示</h2>
 <h3 id=寄存器>寄存器</h3>
 <h4 id=整数寄存器>整数寄存器</h4>
-<p><img src=x86-64-registers.png alt=image-20210817103601810 style=zoom:50%></p>
+<img src=x86-64-registers.png alt=image-20210817103601810 style=zoom:50%>
 <h4 id=条件码寄存器>条件码寄存器</h4>
 <ul>
 <li>CF：进位标志，表示最高位产生了进位</li>
@@ -131,7 +131,7 @@
 <h4 id=操作数指示符>操作数指示符</h4>
 <p><img src=x86-64-imm.png alt></p>
 <h3 id=栈帧>栈帧</h3>
-<p><img src=x86-64-stack.png style=zoom:50%></p>
+<img src=x86-64-stack.png style=zoom:50%>
 <p>x86-64提供六个寄存器用于函数参数传递（%rdi, %rsi, %rdx, %rcx, %r8, %r9），每一个调用的函数都会事先在栈上开辟空间，填入需要存储的变量。</p>
 <p>如果函数需要的参数非常多，六个寄存器不够放，那么就需要在调用者的栈中另外开辟空间，如图中的参数7至参数n，然后在被调用函数Q中指定。</p>
 <p>对于一些变长栈帧，gcc还会在返回地址下面保存%rbp（base pointer），用于保存之前的%rbp寄存器值，然后将%rbp指向新的栈底。</p>
