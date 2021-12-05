@@ -2,8 +2,10 @@
 title: "cs:app 第六章 & cachelab 记录"
 date: 2021-09-12T13:36:31+08:00
 toc: true
+mathjax: true
 tags: 
 - cs:app
+- cache
 description: 利用缓存加快程序对某个地方的“痛击”👊
 ---
 
