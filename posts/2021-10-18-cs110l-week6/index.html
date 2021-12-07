@@ -5,7 +5,7 @@
 <meta itemprop=name content="CS110L Week 6">
 <meta itemprop=description content="简易 parallel_map"><meta itemprop=datePublished content="2021-10-18T16:20:21+08:00">
 <meta itemprop=dateModified content="2021-10-18T16:20:21+08:00">
-<meta itemprop=wordCount content="173">
+<meta itemprop=wordCount content="175">
 <meta itemprop=keywords content="CS110L,Rust,"><meta property="og:title" content="CS110L Week 6">
 <meta property="og:description" content="简易 parallel_map">
 <meta property="og:type" content="article">
@@ -63,6 +63,7 @@
 <hr>
 <div class=markdown>
 <p>实现 parallel_map，使用多线程在向量上执行函数 F，返回所有执行结果</p>
+<p>week6 实验主页<a href=https://reberhardt.com/cs110l/spring-2020/assignments/week-6-exercises/>在此</a></p>
 <h2 id=设计思路>设计思路</h2>
 <p>分为主线程和工作线程两部分，主线程负责将输入的元素通过通道发送给工作线程，工作线程需要将执行结果返回给主线程，主线程负责将结果放入结果向量中，因此需要两个 channel。</p>
 <p>由于需要将每个元素的执行结果按照原有的输入顺序返回，在给工作线程传递参数的时候需要将元素在向量中的位置一并发送。</p>
