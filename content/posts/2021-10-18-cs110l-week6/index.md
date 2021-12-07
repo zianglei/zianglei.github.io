@@ -10,6 +10,8 @@ tags:
 
 实现 parallel_map，使用多线程在向量上执行函数 F，返回所有执行结果
 
+week6 实验主页[在此](https://reberhardt.com/cs110l/spring-2020/assignments/week-6-exercises/)
+
 ## 设计思路
 
 分为主线程和工作线程两部分，主线程负责将输入的元素通过通道发送给工作线程，工作线程需要将执行结果返回给主线程，主线程负责将结果放入结果向量中，因此需要两个 channel。
