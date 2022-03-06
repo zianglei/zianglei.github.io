@@ -21,152 +21,81 @@
 <link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
 <script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-</head>
-<body>
+</head><body>
 <div class="container wrapper">
 <div class=header>
 <div class=avatar>
 <a href=https://lza852.com/>
 <img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
 </a>
-</div>
-<h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1>
-<div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
-</nav>
-</div>
-<nav class=nav>
+</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
 <ul class=flat>
-</ul>
-</nav>
-</div>
-<div class=post>
+</ul></nav></div><div class=post>
 <div class=post-header>
 <div class=meta>
 <div class=date>
 <span class=day>13</span>
 <span class=rest>Oct 2021</span>
-</div>
-</div>
-<div class=matter>
-<h1 class=title>PVE 6.4 AMD RX6600XT WIN10 显卡直通记录</h1>
-</div>
-</div>
-<div>
+</div></div><div class=matter>
+<h1 class=title>PVE 6.4 AMD RX6600XT WIN10 显卡直通记录</h1></div></div><div>
 <nav id=TableOfContents>
 <ul>
-<li><a href=#主机配置>主机配置</a></li>
-<li><a href=#配置步骤>配置步骤</a>
+<li><a href=#主机配置>主机配置</a></li><li><a href=#配置步骤>配置步骤</a>
 <ul>
-<li><a href=#打-vendor-reset-补丁>打 vendor-reset 补丁</a></li>
-<li><a href=#创建-win10-虚拟机>创建 WIN10 虚拟机</a></li>
-<li><a href=#提取显卡-rom>提取显卡 ROM</a></li>
-<li><a href=#设置-cpu-选项>设置 cpu 选项</a></li>
-<li><a href=#设置虚拟机显示输出>设置虚拟机显示输出</a></li>
-</ul>
-</li>
-<li><a href=#所有相关配置文件>所有相关配置文件</a>
+<li><a href=#打-vendor-reset-补丁>打 vendor-reset 补丁</a></li><li><a href=#创建-win10-虚拟机>创建 WIN10 虚拟机</a></li><li><a href=#提取显卡-rom>提取显卡 ROM</a></li><li><a href=#设置-cpu-选项>设置 cpu 选项</a></li><li><a href=#设置虚拟机显示输出>设置虚拟机显示输出</a></li></ul></li><li><a href=#所有相关配置文件>所有相关配置文件</a>
 <ul>
-<li><a href=#虚拟机配置文件>虚拟机配置文件</a></li>
-<li><a href=#grub-配置文件>GRUB 配置文件</a></li>
-<li><a href=#blacklist>blacklist</a></li>
-<li><a href=#vfioconf>vfio.conf</a></li>
-</ul>
-</li>
-</ul>
-</nav>
-</div>
-<hr>
+<li><a href=#虚拟机配置文件>虚拟机配置文件</a></li><li><a href=#grub-配置文件>GRUB 配置文件</a></li><li><a href=#blacklist>blacklist</a></li><li><a href=#vfioconf>vfio.conf</a></li></ul></li></ul></nav></div><hr>
 <div class=markdown>
-<p>PVE 做显卡直通经常出现错误代码 43 的情况，不出意外我也碰上了，下面是我的所有配置和操作步骤，也是折腾了半天，扒了很多论坛。虽然不知道哪个地方解决了问题，但是现在是能够稳定工作，所以发出来供参考。</p>
-<h2 id=主机配置>主机配置</h2>
-<p>主板：ASUS B460M Pro</p>
-<p>CPU：Intel i7-10700</p>
-<p>显卡：AMD RX6600XT</p>
-<p>PVE版本：6.4</p>
-<h2 id=配置步骤>配置步骤</h2>
-<p>首先需要更新主板的 BIOS 到最新版本，然后开启主办的虚拟化功能，包括 VT-d、IOMMU、CPU 虚拟化，关闭 CSM，然后最好将主板的首选显卡改为 PEG。</p>
-<p>然后按照 PVE 官方的<a href=https://pve.proxmox.com/wiki/Pci_passthrough>教程</a>配置到 <code>Verify IOMMU Isolation</code> 这一步，在 PVE 中使用下面脚本检查是否显卡在一个单独的 IOMMU 组里</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>shopt -s nullglob
-<span style=color:#00f>for</span> g in <span style=color:#a31515>`</span>find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V<span style=color:#a31515>`</span>; <span style=color:#00f>do</span>
-    echo <span style=color:#a31515>&#34;IOMMU Group </span><span style=color:#a31515>${</span>g##*/<span style=color:#a31515>}</span><span style=color:#a31515>:&#34;</span>
-    <span style=color:#00f>for</span> d in $g/devices/*; <span style=color:#00f>do</span>
-        echo -e <span style=color:#a31515>&#34;\t</span><span style=color:#00f>$(</span>lspci -nns <span style=color:#a31515>${</span>d##*/<span style=color:#a31515>}</span><span style=color:#00f>)</span><span style=color:#a31515>&#34;</span>
-    <span style=color:#00f>done</span>;
-<span style=color:#00f>done</span>;
-</code></pre></div><p>如果有类似下面的输出，就代表显卡在一个单独的 IOMMU 组里面。</p>
-<p><img src=iommu-group.png alt></p>
-<p>很遗憾，我的这个主板的 IOMMU 分组就是个💩，所以需要开启 ACS 补丁，这个补丁需要 CPU 支持，具体参考 PVE 官方教程里面的介绍，一般比较新的 CPU 都支持。PVE 自带 ACS 补丁，只需要在 /etc/default/grub 里的 GRUB_CMDLINE_LINUX_DEFAULT 项里面添加 &ldquo;pcie_acs_override=downstream,multifunction&rdquo;，然后重启即可看到 IOMMU 中每个 PCIE 设备都在单独一个分组里面。</p>
-<h3 id=打-vendor-reset-补丁>打 vendor-reset 补丁</h3>
-<p>这个是官方教程里面说 RX6XXX (XT) 系列会存在复位不正确的 bug，需要打这个 <a href=https://github.com/gnif/vendor-reset>vendor-reset</a> 补丁。这个补丁的说明文件里没有提到支持 RX6600XT，所以并不太清楚是否真的起作用，写在这里仅供参考。</p>
-<h3 id=创建-win10-虚拟机>创建 WIN10 虚拟机</h3>
-<p>参照 PVE 官方的 <a href=https://pve.proxmox.com/wiki/Windows_10_guest_best_practices>win10 best practice</a> ，并且在选择 BIOS 的时候要选 OVMF，即使用 UEFI 启动，然后继续按照上面官方直通教程的 GPU Passthrough 一节中的指导，使用 GPU OVMF PCI Passthrough 的方式。</p>
-<h3 id=提取显卡-rom>提取显卡 ROM</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>cd /sys/bus/pci/devices/0000:01:00.0/
-echo 1 &gt; rom
-cat rom &gt; /tmp/image.rom
-echo 0 &gt; rom
-</code></pre></div><p>注意上面的 0000:01:00.0 要换成自己的显卡的 pci 地址，然后可以使用 <a href=https://github.com/awilliam/rom-parser>rom-parser</a> 校验一下显卡固件是否支持 UEFI 启动，即输出的解析内容里面有 type 3 即可。</p>
-<p><img src=card-rom.png alt></p>
-<p>然后将提取出来的rom（在上面代码的路径是 /tmp/image.rom）放到 /usr/share/kvm 路径下，然后在 win10 虚拟机的配置文件中的显卡 pci 配置项中加入 rom 文件。我的显卡是 RX6600XT，所以就改名成 RX6600XT.rom。</p>
-<p>完整的配置项如下：</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>hostpci0: 0000:03:00,pcie=1,romfile=RX6600XT.rom,x-vga=1
-</code></pre></div><h3 id=设置-cpu-选项>设置 cpu 选项</h3>
-<p>在虚拟机配置文件中添加 CPU 选项</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>cpu: host,hidden=1,flags=+pcid
-</code></pre></div><h3 id=设置虚拟机显示输出>设置虚拟机显示输出</h3>
-<p>将 WIN10 虚拟机的自带显示输出为 none，只通过显卡进行输出。</p>
-<p>如果不出意外的话直通就应该能成功了！</p>
-<p>然后在 WIN10 里面安装 AMD 的驱动即可，安装完成在设备管理器里就能看到不带黄色感叹号的显卡了！</p>
-<h2 id=所有相关配置文件>所有相关配置文件</h2>
-<h3 id=虚拟机配置文件>虚拟机配置文件</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>agent: 1
-bios: ovmf
-boot: order=scsi0;ide2;net0
-cores: 8
-cpu: host,hidden=1,flags=+pcid
-efidisk0: disk-img:100/vm-100-disk-1.qcow2,size=128K
-hostpci0: 0000:03:00,pcie=1,romfile=RX6600XT.rom,x-vga=1
-ide0: local:iso/virtio-win-0.1.185.iso,media=cdrom,size=402812K
-ide2: local:iso/SW_DVD9_Win_Pro_10_20H2_64BIT_ChnSimp_Pro_Ent_EDU_N_MLF_-2_X22-41514.ISO,media=cdrom
-machine: pc-q35-5.2
-memory: 16384
-name: Win10
-net0: virtio=02:F7:CD:B6:9A:56,bridge=vmbr1,firewall=1
-numa: 0
-onboot: 1
-ostype: win10
-scsi0: disk-img:100/vm-100-disk-0.qcow2,cache=writeback,discard=on,size=200G
-scsihw: virtio-scsi-pci
-smbios1: uuid=ced7dbb9-bc4f-473b-804e-f9720a6ce54b
-sockets: 1
-usb0: host=046d:c53f,usb3=1
-usb1: host=0483:522a,usb3=1
-usb2: host=2-5,usb3=1
-vga: none
-vmgenid: d0749618-e1e9-4a4c-8b51-162eac4f26a4
-</code></pre></div><h3 id=grub-配置文件>GRUB 配置文件</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>GRUB_DEFAULT=0
-GRUB_TIMEOUT=5
-GRUB_DISTRIBUTOR=<span style=color:#a31515>&#34;Proxmox Virtual Environment&#34;</span>
-GRUB_CMDLINE_LINUX_DEFAULT=<span style=color:#a31515>&#34;quiet nomodeset intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream,multifunction&#34;</span>
-GRUB_CMDLINE_LINUX=<span style=color:#a31515>&#34;&#34;</span>
-</code></pre></div><h3 id=blacklist>blacklist</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>blacklist radeon
-blacklist nouveau
-blacklist nvidia
-</code></pre></div><h3 id=vfioconf>vfio.conf</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>options vfio-pci ids=1002:73ff,1002:ab28 disable_vga=1
-</code></pre></div>
-</div>
-<div class=tags>
-</div></div>
-</div>
-<div class="footer wrapper">
+<p>PVE 做显卡直通经常出现错误代码 43 的情况，不出意外我也碰上了，下面是我的所有配置和操作步骤，也是折腾了半天，扒了很多论坛。虽然不知道哪个地方解决了问题，但是现在是能够稳定工作，所以发出来供参考。</p><h2 id=主机配置>主机配置</h2><p>主板：ASUS B460M Pro</p><p>CPU：Intel i7-10700</p><p>显卡：AMD RX6600XT</p><p>PVE版本：6.4</p><h2 id=配置步骤>配置步骤</h2><p>首先需要更新主板的 BIOS 到最新版本，然后开启主板的虚拟化功能，包括 VT-d、IOMMU、CPU 虚拟化，关闭 CSM，然后最好将主板的首选显卡改为 PEG。</p><p>然后按照 PVE 官方的<a href=https://pve.proxmox.com/wiki/Pci_passthrough>教程</a>配置到 <code>Verify IOMMU Isolation</code> 这一步，在 PVE 中使用下面脚本检查是否显卡在一个单独的 IOMMU 组里</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>shopt -s nullglob
+</span></span><span style=display:flex><span><span style=color:#00f>for</span> g in <span style=color:#a31515>`</span>find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V<span style=color:#a31515>`</span>; <span style=color:#00f>do</span>
+</span></span><span style=display:flex><span>    echo <span style=color:#a31515>&#34;IOMMU Group </span><span style=color:#a31515>${</span>g##*/<span style=color:#a31515>}</span><span style=color:#a31515>:&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>for</span> d in $g/devices/*; <span style=color:#00f>do</span>
+</span></span><span style=display:flex><span>        echo -e <span style=color:#a31515>&#34;\t</span><span style=color:#00f>$(</span>lspci -nns <span style=color:#a31515>${</span>d##*/<span style=color:#a31515>}</span><span style=color:#00f>)</span><span style=color:#a31515>&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>done</span>;
+</span></span><span style=display:flex><span><span style=color:#00f>done</span>;
+</span></span></code></pre></div><p>如果有类似下面的输出，就代表显卡在一个单独的 IOMMU 组里面。</p><p><img src=iommu-group.png alt></p><p>很遗憾，我的这个主板的 IOMMU 分组就是个💩，所以需要开启 ACS 补丁，这个补丁需要 CPU 支持，具体参考 PVE 官方教程里面的介绍，一般比较新的 CPU 都支持。PVE 自带 ACS 补丁，只需要在 /etc/default/grub 里的 GRUB_CMDLINE_LINUX_DEFAULT 项里面添加 &ldquo;pcie_acs_override=downstream,multifunction&rdquo;，然后重启即可看到 IOMMU 中每个 PCIE 设备都在单独一个分组里面。</p><h3 id=打-vendor-reset-补丁>打 vendor-reset 补丁</h3><p>这个是官方教程里面说 RX6XXX (XT) 系列会存在复位不正确的 bug，需要打这个 <a href=https://github.com/gnif/vendor-reset>vendor-reset</a> 补丁。这个补丁的说明文件里没有提到支持 RX6600XT，所以并不太清楚是否真的起作用，写在这里仅供参考。</p><h3 id=创建-win10-虚拟机>创建 WIN10 虚拟机</h3><p>参照 PVE 官方的 <a href=https://pve.proxmox.com/wiki/Windows_10_guest_best_practices>win10 best practice</a> ，并且在选择 BIOS 的时候要选 OVMF，即使用 UEFI 启动，然后继续按照上面官方直通教程的 GPU Passthrough 一节中的指导，使用 GPU OVMF PCI Passthrough 的方式。</p><h3 id=提取显卡-rom>提取显卡 ROM</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>cd /sys/bus/pci/devices/0000:01:00.0/
+</span></span><span style=display:flex><span>echo 1 &gt; rom
+</span></span><span style=display:flex><span>cat rom &gt; /tmp/image.rom
+</span></span><span style=display:flex><span>echo 0 &gt; rom
+</span></span></code></pre></div><p>注意上面的 0000:01:00.0 要换成自己的显卡的 pci 地址，然后可以使用 <a href=https://github.com/awilliam/rom-parser>rom-parser</a> 校验一下显卡固件是否支持 UEFI 启动，即输出的解析内容里面有 type 3 即可。</p><p><img src=card-rom.png alt></p><p>然后将提取出来的rom（在上面代码的路径是 /tmp/image.rom）放到 /usr/share/kvm 路径下，然后在 win10 虚拟机的配置文件中的显卡 pci 配置项中加入 rom 文件。我的显卡是 RX6600XT，所以就改名成 RX6600XT.rom。</p><p>完整的配置项如下：</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>hostpci0: 0000:03:00,pcie=1,romfile=RX6600XT.rom,x-vga=1
+</span></span></code></pre></div><h3 id=设置-cpu-选项>设置 cpu 选项</h3><p>在虚拟机配置文件中添加 CPU 选项</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>cpu: host,hidden=1,flags=+pcid
+</span></span></code></pre></div><h3 id=设置虚拟机显示输出>设置虚拟机显示输出</h3><p>将 WIN10 虚拟机的自带显示输出为 none，只通过显卡进行输出。</p><p>如果不出意外的话直通就应该能成功了！</p><p>然后在 WIN10 里面安装 AMD 的驱动即可，安装完成在设备管理器里就能看到不带黄色感叹号的显卡了！</p><h2 id=所有相关配置文件>所有相关配置文件</h2><h3 id=虚拟机配置文件>虚拟机配置文件</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>agent: 1
+</span></span><span style=display:flex><span>bios: ovmf
+</span></span><span style=display:flex><span>boot: order=scsi0;ide2;net0
+</span></span><span style=display:flex><span>cores: 8
+</span></span><span style=display:flex><span>cpu: host,hidden=1,flags=+pcid
+</span></span><span style=display:flex><span>efidisk0: disk-img:100/vm-100-disk-1.qcow2,size=128K
+</span></span><span style=display:flex><span>hostpci0: 0000:03:00,pcie=1,romfile=RX6600XT.rom,x-vga=1
+</span></span><span style=display:flex><span>ide0: local:iso/virtio-win-0.1.185.iso,media=cdrom,size=402812K
+</span></span><span style=display:flex><span>ide2: local:iso/SW_DVD9_Win_Pro_10_20H2_64BIT_ChnSimp_Pro_Ent_EDU_N_MLF_-2_X22-41514.ISO,media=cdrom
+</span></span><span style=display:flex><span>machine: pc-q35-5.2
+</span></span><span style=display:flex><span>memory: 16384
+</span></span><span style=display:flex><span>name: Win10
+</span></span><span style=display:flex><span>net0: virtio=02:F7:CD:B6:9A:56,bridge=vmbr1,firewall=1
+</span></span><span style=display:flex><span>numa: 0
+</span></span><span style=display:flex><span>onboot: 1
+</span></span><span style=display:flex><span>ostype: win10
+</span></span><span style=display:flex><span>scsi0: disk-img:100/vm-100-disk-0.qcow2,cache=writeback,discard=on,size=200G
+</span></span><span style=display:flex><span>scsihw: virtio-scsi-pci
+</span></span><span style=display:flex><span>smbios1: uuid=ced7dbb9-bc4f-473b-804e-f9720a6ce54b
+</span></span><span style=display:flex><span>sockets: 1
+</span></span><span style=display:flex><span>usb0: host=046d:c53f,usb3=1
+</span></span><span style=display:flex><span>usb1: host=0483:522a,usb3=1
+</span></span><span style=display:flex><span>usb2: host=2-5,usb3=1
+</span></span><span style=display:flex><span>vga: none
+</span></span><span style=display:flex><span>vmgenid: d0749618-e1e9-4a4c-8b51-162eac4f26a4
+</span></span></code></pre></div><h3 id=grub-配置文件>GRUB 配置文件</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>GRUB_DEFAULT=0
+</span></span><span style=display:flex><span>GRUB_TIMEOUT=5
+</span></span><span style=display:flex><span>GRUB_DISTRIBUTOR=<span style=color:#a31515>&#34;Proxmox Virtual Environment&#34;</span>
+</span></span><span style=display:flex><span>GRUB_CMDLINE_LINUX_DEFAULT=<span style=color:#a31515>&#34;quiet nomodeset intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream,multifunction&#34;</span>
+</span></span><span style=display:flex><span>GRUB_CMDLINE_LINUX=<span style=color:#a31515>&#34;&#34;</span>
+</span></span></code></pre></div><h3 id=blacklist>blacklist</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>blacklist radeon
+</span></span><span style=display:flex><span>blacklist nouveau
+</span></span><span style=display:flex><span>blacklist nvidia
+</span></span></code></pre></div><h3 id=vfioconf>vfio.conf</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>options vfio-pci ids=1002:73ff,1002:ab28 disable_vga=1
+</span></span></code></pre></div></div><div class=tags>
+</div></div></div><div class="footer wrapper">
 <nav class=nav>
-<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
-</nav>
-</div>
-<script>feather.replace()</script>
-</body>
-</html>
+<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
+</body></html>

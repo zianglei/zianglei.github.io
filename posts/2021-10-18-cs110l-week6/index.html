@@ -21,118 +21,81 @@
 <link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
 <script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-</head>
-<body>
+</head><body>
 <div class="container wrapper">
 <div class=header>
 <div class=avatar>
 <a href=https://lza852.com/>
 <img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
 </a>
-</div>
-<h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1>
-<div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
-</nav>
-</div>
-<nav class=nav>
+</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
 <ul class=flat>
-</ul>
-</nav>
-</div>
-<div class=post>
+</ul></nav></div><div class=post>
 <div class=post-header>
 <div class=meta>
 <div class=date>
 <span class=day>18</span>
 <span class=rest>Oct 2021</span>
-</div>
-</div>
-<div class=matter>
-<h1 class=title>CS110L Week 6</h1>
-</div>
-</div>
-<div>
+</div></div><div class=matter>
+<h1 class=title>CS110L Week 6</h1></div></div><div>
 <nav id=TableOfContents>
 <ul>
-<li><a href=#设计思路>设计思路</a></li>
-<li><a href=#代码>代码</a></li>
-</ul>
-</nav>
-</div>
-<hr>
+<li><a href=#设计思路>设计思路</a></li><li><a href=#代码>代码</a></li></ul></nav></div><hr>
 <div class=markdown>
-<p>实现 parallel_map，使用多线程在向量上执行函数 F，返回所有执行结果</p>
-<p>week6 实验主页<a href=https://reberhardt.com/cs110l/spring-2020/assignments/week-6-exercises/>在此</a></p>
-<h2 id=设计思路>设计思路</h2>
-<p>分为主线程和工作线程两部分，主线程负责将输入的元素通过通道发送给工作线程，工作线程需要将执行结果返回给主线程，主线程负责将结果放入结果向量中，因此需要两个 channel。</p>
-<p>由于需要将每个元素的执行结果按照原有的输入顺序返回，在给工作线程传递参数的时候需要将元素在向量中的位置一并发送。</p>
-<p>注意 crossbeam_channel 在一端<strong>所有</strong>引用断开连接之后，另一段的 send/recv 才会跳出循环，因此注意找到所有的引用。在此处实现中，工作线程的输出端在主线程也会有一个引用，应该在所有工作线程创建完成后将该引用 drop 掉。</p>
-<h2 id=代码>代码</h2>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>fn</span> parallel_map&lt;T, U, F&gt;(<span style=color:#00f>mut</span> input_vec: Vec&lt;T&gt;, num_threads: <span style=color:#2b91af>usize</span>, f: <span style=color:#2b91af>F</span>) -&gt; Vec&lt;U&gt;
-<span style=color:#00f>where</span>
-    F: FnOnce(T) -&gt; <span style=color:#2b91af>U</span> + Send + Copy + &#39;static,
-    T: Send + &#39;static,
-    U: Send + &#39;static + Default,
-{
-    <span style=color:#00f>let</span> <span style=color:#00f>mut</span> output_vec: Vec&lt;U&gt; = Vec::with_capacity(input_vec.len());
-    <span style=color:green>// TODO: implement parallel map!
-</span><span style=color:green></span>    <span style=color:#00f>let</span> (input_tx, input_rx) = crossbeam_channel::unbounded::&lt;Data&lt;T&gt;&gt;();
-    <span style=color:#00f>let</span> (output_tx, output_rx) = crossbeam_channel::unbounded::&lt;Data&lt;U&gt;&gt;();
-    <span style=color:#00f>let</span> <span style=color:#00f>mut</span> threads = Vec::new();
-
-    <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> 0..num_threads {
-        <span style=color:#00f>let</span> input_rx = input_rx.clone();
-        <span style=color:#00f>let</span> output_tx = output_tx.clone();
-        threads.push(
-            thread::spawn(<span style=color:#00f>move</span> || {
-                <span style=color:#00f>while</span> <span style=color:#00f>let</span> Ok(received) = input_rx.recv() {
-                    <span style=color:#00f>let</span> output: <span style=color:#2b91af>Data</span>&lt;U&gt; = Data { data: <span style=color:#2b91af>f</span>(received.data), index: <span style=color:#2b91af>received</span>.index };
-                    output_tx.send(output).unwrap();
-                }
-                drop(output_tx);
-            })
-        );
-    }
-
-    drop(output_tx);
-
-    <span style=color:#00f>for</span> (index, data) <span style=color:#00f>in</span> input_vec.into_iter().enumerate() {
-        input_tx.send(Data { data, index }).unwrap();
-    }
-
-    drop(input_tx);
-    
-    <span style=color:#00f>while</span> <span style=color:#00f>let</span> Ok(received) = output_rx.recv() {
-        <span style=color:#00f>if</span> output_vec.len() &lt;= received.index {
-            <span style=color:#00f>let</span> len = output_vec.len();
-            <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> 0..(received.index - len + 1) {
-                output_vec.push(U::default());
-            }
-        }
-        output_vec[received.index] = received.data;
-    }
-
-    <span style=color:#00f>for</span> handle <span style=color:#00f>in</span> threads {
-        handle.join().expect(<span style=color:#a31515>&#34;Panic occurs in a thread!&#34;</span>);
-    }
-
-    output_vec
-}
-</code></pre></div>
-</div>
-<div class=tags>
+<p>实现 parallel_map，使用多线程在向量上执行函数 F，返回所有执行结果</p><p>week6 实验主页<a href=https://reberhardt.com/cs110l/spring-2020/assignments/week-6-exercises/>在此</a></p><h2 id=设计思路>设计思路</h2><p>分为主线程和工作线程两部分，主线程负责将输入的元素通过通道发送给工作线程，工作线程需要将执行结果返回给主线程，主线程负责将结果放入结果向量中，因此需要两个 channel。</p><p>由于需要将每个元素的执行结果按照原有的输入顺序返回，在给工作线程传递参数的时候需要将元素在向量中的位置一并发送。</p><p>注意 crossbeam_channel 在一端<strong>所有</strong>引用断开连接之后，另一段的 send/recv 才会跳出循环，因此注意找到所有的引用。在此处实现中，工作线程的输出端在主线程也会有一个引用，应该在所有工作线程创建完成后将该引用 drop 掉。</p><h2 id=代码>代码</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>fn</span> parallel_map&lt;T, U, F&gt;(<span style=color:#00f>mut</span> input_vec: Vec&lt;T&gt;, num_threads: <span style=color:#2b91af>usize</span>, f: <span style=color:#2b91af>F</span>) -&gt; Vec&lt;U&gt;
+</span></span><span style=display:flex><span><span style=color:#00f>where</span>
+</span></span><span style=display:flex><span>    F: FnOnce(T) -&gt; <span style=color:#2b91af>U</span> + Send + Copy + &#39;static,
+</span></span><span style=display:flex><span>    T: Send + &#39;static,
+</span></span><span style=display:flex><span>    U: Send + &#39;static + Default,
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#00f>let</span> <span style=color:#00f>mut</span> output_vec: Vec&lt;U&gt; = Vec::with_capacity(input_vec.len());
+</span></span><span style=display:flex><span>    <span style=color:green>// TODO: implement parallel map!
+</span></span></span><span style=display:flex><span><span style=color:green></span>    <span style=color:#00f>let</span> (input_tx, input_rx) = crossbeam_channel::unbounded::&lt;Data&lt;T&gt;&gt;();
+</span></span><span style=display:flex><span>    <span style=color:#00f>let</span> (output_tx, output_rx) = crossbeam_channel::unbounded::&lt;Data&lt;U&gt;&gt;();
+</span></span><span style=display:flex><span>    <span style=color:#00f>let</span> <span style=color:#00f>mut</span> threads = Vec::new();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> 0..num_threads {
+</span></span><span style=display:flex><span>        <span style=color:#00f>let</span> input_rx = input_rx.clone();
+</span></span><span style=display:flex><span>        <span style=color:#00f>let</span> output_tx = output_tx.clone();
+</span></span><span style=display:flex><span>        threads.push(
+</span></span><span style=display:flex><span>            thread::spawn(<span style=color:#00f>move</span> || {
+</span></span><span style=display:flex><span>                <span style=color:#00f>while</span> <span style=color:#00f>let</span> Ok(received) = input_rx.recv() {
+</span></span><span style=display:flex><span>                    <span style=color:#00f>let</span> output: <span style=color:#2b91af>Data</span>&lt;U&gt; = Data { data: <span style=color:#2b91af>f</span>(received.data), index: <span style=color:#2b91af>received</span>.index };
+</span></span><span style=display:flex><span>                    output_tx.send(output).unwrap();
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>                drop(output_tx);
+</span></span><span style=display:flex><span>            })
+</span></span><span style=display:flex><span>        );
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    drop(output_tx);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>for</span> (index, data) <span style=color:#00f>in</span> input_vec.into_iter().enumerate() {
+</span></span><span style=display:flex><span>        input_tx.send(Data { data, index }).unwrap();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    drop(input_tx);
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#00f>while</span> <span style=color:#00f>let</span> Ok(received) = output_rx.recv() {
+</span></span><span style=display:flex><span>        <span style=color:#00f>if</span> output_vec.len() &lt;= received.index {
+</span></span><span style=display:flex><span>            <span style=color:#00f>let</span> len = output_vec.len();
+</span></span><span style=display:flex><span>            <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> 0..(received.index - len + 1) {
+</span></span><span style=display:flex><span>                output_vec.push(U::default());
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        output_vec[received.index] = received.data;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>for</span> handle <span style=color:#00f>in</span> threads {
+</span></span><span style=display:flex><span>        handle.join().expect(<span style=color:#a31515>&#34;Panic occurs in a thread!&#34;</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    output_vec
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div></div><div class=tags>
 <ul class=flat>
-<li><a href=/tags/cs110l>CS110L</a></li>
-<li><a href=/tags/rust>Rust</a></li>
-</ul>
-</div></div>
-</div>
-<div class="footer wrapper">
+<li><a href=/tags/cs110l>CS110L</a></li><li><a href=/tags/rust>Rust</a></li></ul></div></div></div><div class="footer wrapper">
 <nav class=nav>
-<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
-</nav>
-</div>
-<script>feather.replace()</script>
-</body>
-</html>
+<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
+</body></html>

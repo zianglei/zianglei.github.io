@@ -21,225 +21,159 @@
 <link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
 <script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-</head>
-<body>
+</head><body>
 <div class="container wrapper">
 <div class=header>
 <div class=avatar>
 <a href=https://lza852.com/>
 <img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
 </a>
-</div>
-<h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1>
-<div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
-</nav>
-</div>
-<nav class=nav>
+</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
 <ul class=flat>
-</ul>
-</nav>
-</div>
-<div class=post>
+</ul></nav></div><div class=post>
 <div class=post-header>
 <div class=meta>
 <div class=date>
 <span class=day>07</span>
 <span class=rest>Sep 2021</span>
-</div>
-</div>
-<div class=matter>
-<h1 class=title>CS110L Week 3</h1>
-</div>
-</div>
-<div>
+</div></div><div class=matter>
+<h1 class=title>CS110L Week 3</h1></div></div><div>
 <nav id=TableOfContents>
 <ul>
 <li><a href=#part-1>Part 1</a>
 <ul>
-<li><a href=#找到一个进程打开的所有文件描述符>找到一个进程打开的所有文件描述符</a></li>
-<li><a href=#读取文件描述符信息>读取文件描述符信息</a></li>
-</ul>
-</li>
-<li><a href=#part-2>Part 2</a>
+<li><a href=#找到一个进程打开的所有文件描述符>找到一个进程打开的所有文件描述符</a></li><li><a href=#读取文件描述符信息>读取文件描述符信息</a></li></ul></li><li><a href=#part-2>Part 2</a>
 <ul>
-<li><a href=#实现泛形>实现泛形</a></li>
-<li><a href=#实现-clone-trait>实现 Clone trait</a></li>
-<li><a href=#实现-partialeq-trait>实现 PartialEq trait</a></li>
-<li><a href=#实现-iteratorintoiterator-trait>实现 Iterator/IntoIterator trait</a></li>
-</ul>
-</li>
-</ul>
-</nav>
-</div>
-<hr>
+<li><a href=#实现泛形>实现泛形</a></li><li><a href=#实现-clone-trait>实现 Clone trait</a></li><li><a href=#实现-partialeq-trait>实现 PartialEq trait</a></li><li><a href=#实现-iteratorintoiterator-trait>实现 Iterator/IntoIterator trait</a></li></ul></li></ul></nav></div><hr>
 <div class=markdown>
-<h2 id=part-1>Part 1</h2>
-<p>使用 Rust 实现一个小工具 inspect-fds，查看进程打开的文件描述符信息。</p>
-<h3 id=找到一个进程打开的所有文件描述符>找到一个进程打开的所有文件描述符</h3>
-<p>一个进程打开的文件描述符存放在 <code>/proc/$pid/fd</code> 文件夹下。</p>
-<p>因此使用 std::fs::read_dir 遍历当前路径，由于要求 list_fds 函数返回 Option&lt;Vec&lt;usize&#187;，但是 std::fs::read_dir 返回的是 Result，因此我们可以使用 Result.ok()? 将 Result 转换为 Option，当 Result 返回 Err 的时候，会转换为 None</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>for</span> entry <span style=color:#00f>in</span> fs::read_dir(fd_path).ok()? {
-     <span style=color:#00f>let</span> entry = entry.ok()?;
-     <span style=color:#00f>let</span> fd = entry.file_name()
-                .into_string().ok()?
-                .parse::&lt;<span style=color:#2b91af>usize</span>&gt;().ok()?;
-     open_fds.push(fd);
-}
-</code></pre></div><p>注意在使用 vscode remote 远程连接时，每个进程会多出 19 和 99 两个文件描述符，查看它们指向的描述符分别是 /dev/ptmx 和 vscode remote 创建的文件。</p>
-<p>/dev/ptmx 是 Linux 的伪终端，当打开时，会自动创建 master 和 slave（slave 位于 /dev/pts/ 下），为了实现虚拟化的目标，伪终端模拟器通过master发送键盘输入，bash 等终端进程通过 slave 接收，然后将执行结果通过 slave 发送，伪终端模拟器通过 master 接收处理结果，显示到显示器上。</p>
-<h3 id=读取文件描述符信息>读取文件描述符信息</h3>
-<p>由于 /proc/$pid/fd 下所有的文件都是软链接，因此需要使用 <code>fs::read_link</code> 获取文件描述符指向的真实的文件，然后使用 <code>fs::read_to_string</code> 读取 /proc/$pid/fdinfo/$fd 下的信息，然后使用正则表达式提取信息即可得到文件描述符的 AccessMode、Cursor。</p>
-<p>使用正则表达式</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>let</span> re = Regex::new(<span style=color:#a31515>r&#34;pos:\s*(\d+)&#34;</span>).unwrap();
-Some(
-    re.captures(fdinfo)?
-        .get(1)?
-        .as_str()
-        .parse::&lt;<span style=color:#2b91af>usize</span>&gt;()
-        .ok()?,
-    )
-</code></pre></div><h2 id=part-2>Part 2</h2>
-<p>实现一个通用的链表，练习泛型和 trait 的用法</p>
-<p>Box&lt;T> 表示在堆上为对象分配内存，返回指向内存的指针</p>
-<h3 id=实现泛形>实现泛形</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>impl</span>&lt;T&gt; LinkedList&lt;T&gt; {
-    head: Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;,
-    size: <span style=color:#2b91af>usize</span>,
-}
-</code></pre></div><h3 id=实现-clone-trait>实现 Clone trait</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>impl</span>&lt;T: Clone&gt; Clone <span style=color:#00f>for</span> Node&lt;T&gt; {
-    <span style=color:#00f>fn</span> clone(&amp;self) -&gt; <span style=color:#2b91af>Self</span> {
-        <span style=color:green>// next 会自动克隆下一个节点
-</span><span style=color:green></span>        Node { value: <span style=color:#2b91af>self</span>.value.clone(), next: <span style=color:#2b91af>self</span>.next.clone() }
-    }
-}
-
-</code></pre></div><h3 id=实现-partialeq-trait>实现 PartialEq trait</h3>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>impl</span>&lt;T: PartialEq&gt; PartialEq <span style=color:#00f>for</span> LinkedList&lt;T&gt; {
-    <span style=color:#00f>fn</span> eq(&amp;self, rhs: <span style=color:#00f>&amp;</span><span style=color:#2b91af>LinkedList</span>&lt;T&gt;) -&gt; <span style=color:#2b91af>bool</span> {
-        <span style=color:#00f>if</span> self.size != rhs.size {
-            <span style=color:#00f>return</span> <span style=color:#00f>false</span>;
-        } 
-        <span style=color:#00f>let</span> <span style=color:#00f>mut</span> l: <span style=color:#00f>&amp;</span>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt; = &amp;self.head;
-        <span style=color:#00f>let</span> <span style=color:#00f>mut</span> r: <span style=color:#00f>&amp;</span>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt; = &amp;rhs.head;
-        <span style=color:#00f>loop</span> {
-            <span style=color:#00f>match</span> l {
-                Some(node) =&gt; {
-                    <span style=color:green>// node 类型是 &amp;Box&lt;Node&lt;T&gt;&gt;, r 类型是&amp;Option&lt;Box&lt;Node&lt;T&gt;&gt;，如果直接 unwrap，得到的就是 Box&lt;Node&lt;T&gt;&gt;，不能做比较，因此我们需要使用 as_ref，转换成 Option&lt;&amp;Box&lt;Node&lt;T&gt;&gt;，然后再 unwrap
-</span><span style=color:green></span>                    <span style=color:#00f>let</span> rnode = r.as_ref().unwrap();
-                    <span style=color:#00f>if</span> *node != *rnode {
-                        <span style=color:#00f>return</span> <span style=color:#00f>false</span>
-                    }
-                    l = &amp;node.next;
-                    r = &amp;rnode.next;
-                },
-                None =&gt; <span style=color:#00f>break</span>,
-            }
-        }
-        <span style=color:#00f>true</span>
-    }
-}
-</code></pre></div><p>注意比较时候的类型转换。</p>
-<p>Option::AsRef 和通常的 as_ref 不同，会将 &Option&lt;T> 转换成 Option&lt;&T>，也就是说刚开始对 Option 是没有所有权的，通过 as_ref 转换成了 Option&lt;&T>，就有了所有权，可以调用 unwrap 获取里面的 T 的引用。</p>
-<h3 id=实现-iteratorintoiterator-trait>实现 Iterator/IntoIterator trait</h3>
-<p>引用自 <a href=http://xion.io/post/code/rust-for-loop.html>这篇</a> 文章，在 Rust 中，为了实现遍历所有元素，通常使用迭代器访问元素，迭代器起到的作用是获取当前值、向前指向下一个值、如果全部已经遍历完就返回 None</p>
-<p>如果一个类型实现了 Iterator trait，就可以转换成一个迭代器，调用 next 方法获得集合中的值</p>
-<p>而通常使用的 for loop 其实是 IntoIterator trait 的语法糖，其中的 into_iter 方法会返回一个迭代器</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>trait</span> Iterator {
-  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
-}
-<span style=color:#00f>trait</span> IntoIterator {
-  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
-  <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span>
-  <span style=color:#00f>fn</span> into_iter(self) -&gt; Iterator; <span style=color:green>// 可以看到默认的迭代器会将原本的集合的所有权消耗掉，转变成一个迭代器，因此 for loop 使用过后集合就不能再此被使用
-</span><span style=color:green></span>}
-
-<span style=color:#00f>impl</span> IntoIterator <span style=color:#00f>for</span> &amp;Vec&lt;T&gt; {
-  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
-  <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span>
-  <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>Itearator</span>&lt;Item=&amp;T&gt; {
-    <span style=color:green>// 转换成引用迭代器
-</span><span style=color:green></span>  }
-}
-</code></pre></div><p>对于我们的 LinkedList 来说，为了实现</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>for</span> item <span style=color:#00f>in</span> &amp;list {
-  ...
-}
-</code></pre></div><p>我们需要为 &LinkedList&lt;T> 实现 IntoIterator，将其转换成 LinkedListIter，LinkedListIter 需要实现 Iterator trait，对链表里的 value 进行克隆</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>pub</span> <span style=color:#00f>struct</span> <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
-    current: <span style=color:#00f>&amp;</span>&#39;a Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;
-}
-
-<span style=color:#00f>impl</span>&lt;T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedListIter&lt;&#39;_, T&gt; {
-    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = T;
-    <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;T&gt; {
-        <span style=color:#00f>match</span> self.current {
-            Some(node) =&gt; {
-              	<span style=color:green>// 此处直接使用拷贝
-</span><span style=color:green></span>                Some(node.value.clone())
-            },
-            None =&gt; None
-        }
-    }
-}
-
-<span style=color:green>// 引用情况下
-</span><span style=color:green></span><span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; IntoIterator <span style=color:#00f>for</span> &amp;&#39;a LinkedList&lt;T&gt; {
-
-    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = T;
-    <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span> = LinkedListIter&lt;&#39;a, T&gt;;
-
-    <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
-        LinkedListIter { current: <span style=color:#00f>&amp;</span><span style=color:#2b91af>self</span>.head }
-    }
-}
-</code></pre></div><p>如果不使用拷贝形式，而是用引用形式，则可以按照下面方法实现</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; IntoIterator <span style=color:#00f>for</span> &amp;&#39;a LinkedList&lt;T&gt; {
-
-    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = &amp;&#39;a T; <span style=color:green>// 此处变为引用
-</span><span style=color:green></span>    <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span> = LinkedListIter&lt;&#39;a, T&gt;;
-
-    <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
-        LinkedListIter { current: <span style=color:#00f>&amp;</span><span style=color:#2b91af>self</span>.head }
-    }
-}
-
-<span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedListIter&lt;&#39;a, T&gt; {
-    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = &amp;&#39;a T; <span style=color:green>// 此处变为引用
-</span><span style=color:green></span>    <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;&amp;&#39;a T&gt; { <span style=color:green>// Option 返回的类型为引用值
-</span><span style=color:green></span>        <span style=color:#00f>match</span> self.current {
-            Some(node) =&gt; {
-                self.current = &amp;node.next;
-                Some(&amp;node.value) <span style=color:green>// 返回引用
-</span><span style=color:green></span>            },
-            None =&gt; None
-        }
-    }
-}
-</code></pre></div><p>如果需要实现</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>for</span> item <span style=color:#00f>in</span> list {
-  ...
-}
-</code></pre></div><p>我们可以直接为 LinkedList&lt;T> 实现 Iterator</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#00f>impl</span> &lt;T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedList&lt;T&gt; {
-  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
-  <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;T&gt;
-}
-</code></pre></div>
-</div>
-<div class=tags>
+<h2 id=part-1>Part 1</h2><p>使用 Rust 实现一个小工具 inspect-fds，查看进程打开的文件描述符信息。</p><h3 id=找到一个进程打开的所有文件描述符>找到一个进程打开的所有文件描述符</h3><p>一个进程打开的文件描述符存放在 <code>/proc/$pid/fd</code> 文件夹下。</p><p>因此使用 std::fs::read_dir 遍历当前路径，由于要求 list_fds 函数返回 Option&lt;Vec&lt;usize&#187;，但是 std::fs::read_dir 返回的是 Result，因此我们可以使用 Result.ok()? 将 Result 转换为 Option，当 Result 返回 Err 的时候，会转换为 None</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>for</span> entry <span style=color:#00f>in</span> fs::read_dir(fd_path).ok()? {
+</span></span><span style=display:flex><span>     <span style=color:#00f>let</span> entry = entry.ok()?;
+</span></span><span style=display:flex><span>     <span style=color:#00f>let</span> fd = entry.file_name()
+</span></span><span style=display:flex><span>                .into_string().ok()?
+</span></span><span style=display:flex><span>                .parse::&lt;<span style=color:#2b91af>usize</span>&gt;().ok()?;
+</span></span><span style=display:flex><span>     open_fds.push(fd);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>注意在使用 vscode remote 远程连接时，每个进程会多出 19 和 99 两个文件描述符，查看它们指向的描述符分别是 /dev/ptmx 和 vscode remote 创建的文件。</p><p>/dev/ptmx 是 Linux 的伪终端，当打开时，会自动创建 master 和 slave（slave 位于 /dev/pts/ 下），为了实现虚拟化的目标，伪终端模拟器通过master发送键盘输入，bash 等终端进程通过 slave 接收，然后将执行结果通过 slave 发送，伪终端模拟器通过 master 接收处理结果，显示到显示器上。</p><h3 id=读取文件描述符信息>读取文件描述符信息</h3><p>由于 /proc/$pid/fd 下所有的文件都是软链接，因此需要使用 <code>fs::read_link</code> 获取文件描述符指向的真实的文件，然后使用 <code>fs::read_to_string</code> 读取 /proc/$pid/fdinfo/$fd 下的信息，然后使用正则表达式提取信息即可得到文件描述符的 AccessMode、Cursor。</p><p>使用正则表达式</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>let</span> re = Regex::new(<span style=color:#a31515>r&#34;pos:\s*(\d+)&#34;</span>).unwrap();
+</span></span><span style=display:flex><span>Some(
+</span></span><span style=display:flex><span>    re.captures(fdinfo)?
+</span></span><span style=display:flex><span>        .get(1)?
+</span></span><span style=display:flex><span>        .as_str()
+</span></span><span style=display:flex><span>        .parse::&lt;<span style=color:#2b91af>usize</span>&gt;()
+</span></span><span style=display:flex><span>        .ok()?,
+</span></span><span style=display:flex><span>    )
+</span></span></code></pre></div><h2 id=part-2>Part 2</h2><p>实现一个通用的链表，练习泛型和 trait 的用法</p><p>Box&lt;T> 表示在堆上为对象分配内存，返回指向内存的指针</p><h3 id=实现泛形>实现泛形</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>impl</span>&lt;T&gt; LinkedList&lt;T&gt; {
+</span></span><span style=display:flex><span>    head: Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;,
+</span></span><span style=display:flex><span>    size: <span style=color:#2b91af>usize</span>,
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=实现-clone-trait>实现 Clone trait</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>impl</span>&lt;T: Clone&gt; Clone <span style=color:#00f>for</span> Node&lt;T&gt; {
+</span></span><span style=display:flex><span>    <span style=color:#00f>fn</span> clone(&amp;self) -&gt; <span style=color:#2b91af>Self</span> {
+</span></span><span style=display:flex><span>        <span style=color:green>// next 会自动克隆下一个节点
+</span></span></span><span style=display:flex><span><span style=color:green></span>        Node { value: <span style=color:#2b91af>self</span>.value.clone(), next: <span style=color:#2b91af>self</span>.next.clone() }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=实现-partialeq-trait>实现 PartialEq trait</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>impl</span>&lt;T: PartialEq&gt; PartialEq <span style=color:#00f>for</span> LinkedList&lt;T&gt; {
+</span></span><span style=display:flex><span>    <span style=color:#00f>fn</span> eq(&amp;self, rhs: <span style=color:#00f>&amp;</span><span style=color:#2b91af>LinkedList</span>&lt;T&gt;) -&gt; <span style=color:#2b91af>bool</span> {
+</span></span><span style=display:flex><span>        <span style=color:#00f>if</span> self.size != rhs.size {
+</span></span><span style=display:flex><span>            <span style=color:#00f>return</span> <span style=color:#00f>false</span>;
+</span></span><span style=display:flex><span>        } 
+</span></span><span style=display:flex><span>        <span style=color:#00f>let</span> <span style=color:#00f>mut</span> l: <span style=color:#00f>&amp;</span>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt; = &amp;self.head;
+</span></span><span style=display:flex><span>        <span style=color:#00f>let</span> <span style=color:#00f>mut</span> r: <span style=color:#00f>&amp;</span>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt; = &amp;rhs.head;
+</span></span><span style=display:flex><span>        <span style=color:#00f>loop</span> {
+</span></span><span style=display:flex><span>            <span style=color:#00f>match</span> l {
+</span></span><span style=display:flex><span>                Some(node) =&gt; {
+</span></span><span style=display:flex><span>                    <span style=color:green>// node 类型是 &amp;Box&lt;Node&lt;T&gt;&gt;, r 类型是&amp;Option&lt;Box&lt;Node&lt;T&gt;&gt;，如果直接 unwrap，得到的就是 Box&lt;Node&lt;T&gt;&gt;，不能做比较，因此我们需要使用 as_ref，转换成 Option&lt;&amp;Box&lt;Node&lt;T&gt;&gt;，然后再 unwrap
+</span></span></span><span style=display:flex><span><span style=color:green></span>                    <span style=color:#00f>let</span> rnode = r.as_ref().unwrap();
+</span></span><span style=display:flex><span>                    <span style=color:#00f>if</span> *node != *rnode {
+</span></span><span style=display:flex><span>                        <span style=color:#00f>return</span> <span style=color:#00f>false</span>
+</span></span><span style=display:flex><span>                    }
+</span></span><span style=display:flex><span>                    l = &amp;node.next;
+</span></span><span style=display:flex><span>                    r = &amp;rnode.next;
+</span></span><span style=display:flex><span>                },
+</span></span><span style=display:flex><span>                None =&gt; <span style=color:#00f>break</span>,
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#00f>true</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>注意比较时候的类型转换。</p><p>Option::AsRef 和通常的 as_ref 不同，会将 &Option&lt;T> 转换成 Option&lt;&T>，也就是说刚开始对 Option 是没有所有权的，通过 as_ref 转换成了 Option&lt;&T>，就有了所有权，可以调用 unwrap 获取里面的 T 的引用。</p><h3 id=实现-iteratorintoiterator-trait>实现 Iterator/IntoIterator trait</h3><p>引用自 <a href=http://xion.io/post/code/rust-for-loop.html>这篇</a> 文章，在 Rust 中，为了实现遍历所有元素，通常使用迭代器访问元素，迭代器起到的作用是获取当前值、向前指向下一个值、如果全部已经遍历完就返回 None</p><p>如果一个类型实现了 Iterator trait，就可以转换成一个迭代器，调用 next 方法获得集合中的值</p><p>而通常使用的 for loop 其实是 IntoIterator trait 的语法糖，其中的 into_iter 方法会返回一个迭代器</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>trait</span> Iterator {
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#00f>trait</span> IntoIterator {
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span>
+</span></span><span style=display:flex><span>  <span style=color:#00f>fn</span> into_iter(self) -&gt; Iterator; <span style=color:green>// 可以看到默认的迭代器会将原本的集合的所有权消耗掉，转变成一个迭代器，因此 for loop 使用过后集合就不能再此被使用
+</span></span></span><span style=display:flex><span><span style=color:green></span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#00f>impl</span> IntoIterator <span style=color:#00f>for</span> &amp;Vec&lt;T&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span>
+</span></span><span style=display:flex><span>  <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>Itearator</span>&lt;Item=&amp;T&gt; {
+</span></span><span style=display:flex><span>    <span style=color:green>// 转换成引用迭代器
+</span></span></span><span style=display:flex><span><span style=color:green></span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>对于我们的 LinkedList 来说，为了实现</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>for</span> item <span style=color:#00f>in</span> &amp;list {
+</span></span><span style=display:flex><span>  ...
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们需要为 &LinkedList&lt;T> 实现 IntoIterator，将其转换成 LinkedListIter，LinkedListIter 需要实现 Iterator trait，对链表里的 value 进行克隆</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>pub</span> <span style=color:#00f>struct</span> <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
+</span></span><span style=display:flex><span>    current: <span style=color:#00f>&amp;</span>&#39;a Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#00f>impl</span>&lt;T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedListIter&lt;&#39;_, T&gt; {
+</span></span><span style=display:flex><span>    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = T;
+</span></span><span style=display:flex><span>    <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;T&gt; {
+</span></span><span style=display:flex><span>        <span style=color:#00f>match</span> self.current {
+</span></span><span style=display:flex><span>            Some(node) =&gt; {
+</span></span><span style=display:flex><span>              	<span style=color:green>// 此处直接使用拷贝
+</span></span></span><span style=display:flex><span><span style=color:green></span>                Some(node.value.clone())
+</span></span><span style=display:flex><span>            },
+</span></span><span style=display:flex><span>            None =&gt; None
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:green>// 引用情况下
+</span></span></span><span style=display:flex><span><span style=color:green></span><span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; IntoIterator <span style=color:#00f>for</span> &amp;&#39;a LinkedList&lt;T&gt; {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = T;
+</span></span><span style=display:flex><span>    <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span> = LinkedListIter&lt;&#39;a, T&gt;;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
+</span></span><span style=display:flex><span>        LinkedListIter { current: <span style=color:#00f>&amp;</span><span style=color:#2b91af>self</span>.head }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果不使用拷贝形式，而是用引用形式，则可以按照下面方法实现</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; IntoIterator <span style=color:#00f>for</span> &amp;&#39;a LinkedList&lt;T&gt; {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = &amp;&#39;a T; <span style=color:green>// 此处变为引用
+</span></span></span><span style=display:flex><span><span style=color:green></span>    <span style=color:#00f>type</span> <span style=color:#2b91af>IntoIter</span> = LinkedListIter&lt;&#39;a, T&gt;;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>fn</span> into_iter(self) -&gt; <span style=color:#2b91af>LinkedListIter</span>&lt;&#39;a, T&gt; {
+</span></span><span style=display:flex><span>        LinkedListIter { current: <span style=color:#00f>&amp;</span><span style=color:#2b91af>self</span>.head }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#00f>impl</span>&lt;&#39;a, T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedListIter&lt;&#39;a, T&gt; {
+</span></span><span style=display:flex><span>    <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span> = &amp;&#39;a T; <span style=color:green>// 此处变为引用
+</span></span></span><span style=display:flex><span><span style=color:green></span>    <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;&amp;&#39;a T&gt; { <span style=color:green>// Option 返回的类型为引用值
+</span></span></span><span style=display:flex><span><span style=color:green></span>        <span style=color:#00f>match</span> self.current {
+</span></span><span style=display:flex><span>            Some(node) =&gt; {
+</span></span><span style=display:flex><span>                self.current = &amp;node.next;
+</span></span><span style=display:flex><span>                Some(&amp;node.value) <span style=color:green>// 返回引用
+</span></span></span><span style=display:flex><span><span style=color:green></span>            },
+</span></span><span style=display:flex><span>            None =&gt; None
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果需要实现</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>for</span> item <span style=color:#00f>in</span> list {
+</span></span><span style=display:flex><span>  ...
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们可以直接为 LinkedList&lt;T> 实现 Iterator</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>impl</span> &lt;T: Clone&gt; Iterator <span style=color:#00f>for</span> LinkedList&lt;T&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#00f>type</span> <span style=color:#2b91af>Item</span>
+</span></span><span style=display:flex><span>  <span style=color:#00f>fn</span> next(&amp;<span style=color:#00f>mut</span> self) -&gt; Option&lt;T&gt;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div></div><div class=tags>
 <ul class=flat>
-<li><a href=/tags/rust>Rust</a></li>
-<li><a href=/tags/cs110l>CS110L</a></li>
-</ul>
-</div></div>
-</div>
-<div class="footer wrapper">
+<li><a href=/tags/rust>Rust</a></li><li><a href=/tags/cs110l>CS110L</a></li></ul></div></div></div><div class="footer wrapper">
 <nav class=nav>
-<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
-</nav>
-</div>
-<script>feather.replace()</script>
-</body>
-</html>
+<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
+</body></html>

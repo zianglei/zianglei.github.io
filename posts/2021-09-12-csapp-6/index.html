@@ -21,215 +21,84 @@
 <link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
 <script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script>MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}},window.addEventListener("load",e=>{document.querySelectorAll("mjx-container").forEach(function(e){e.parentElement.classList+="has-jax"})})</script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
-</head>
-<body>
+</head><body>
 <div class="container wrapper">
 <div class=header>
 <div class=avatar>
 <a href=https://lza852.com/>
 <img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
 </a>
-</div>
-<h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1>
-<div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul>
-</nav>
-</div>
-<nav class=nav>
+</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
+<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
 <ul class=flat>
-</ul>
-</nav>
-</div>
-<div class=post>
+</ul></nav></div><div class=post>
 <div class=post-header>
 <div class=meta>
 <div class=date>
 <span class=day>12</span>
 <span class=rest>Sep 2021</span>
-</div>
-</div>
-<div class=matter>
-<h1 class=title>cs:app 第六章 & cachelab 记录</h1>
-</div>
-</div>
-<div>
+</div></div><div class=matter>
+<h1 class=title>cs:app 第六章 & cachelab 记录</h1></div></div><div>
 <nav id=TableOfContents>
 <ul>
 <li><a href=#计算机的存储结构>计算机的存储结构</a>
 <ul>
-<li><a href=#局部性>局部性</a></li>
-<li><a href=#缓存>缓存</a></li>
-<li><a href=#高速缓存存储器>高速缓存存储器</a></li>
-<li><a href=#写缓存>写缓存</a></li>
-<li><a href=#高速缓存不同参数对性能影响>高速缓存不同参数对性能影响</a></li>
-<li><a href=#真实高速缓存的层次结构>真实高速缓存的层次结构</a></li>
-</ul>
-</li>
-<li><a href=#优化程序合理利用缓存>优化程序合理利用缓存</a></li>
-<li><a href=#cachelab>cachelab</a>
+<li><a href=#局部性>局部性</a></li><li><a href=#缓存>缓存</a></li><li><a href=#高速缓存存储器>高速缓存存储器</a></li><li><a href=#写缓存>写缓存</a></li><li><a href=#高速缓存不同参数对性能影响>高速缓存不同参数对性能影响</a></li><li><a href=#真实高速缓存的层次结构>真实高速缓存的层次结构</a></li></ul></li><li><a href=#优化程序合理利用缓存>优化程序合理利用缓存</a></li><li><a href=#cachelab>cachelab</a>
 <ul>
-<li><a href=#实现缓存模拟器-csim>实现缓存模拟器 csim</a></li>
-</ul>
-</li>
-</ul>
-</nav>
-</div>
-<hr>
+<li><a href=#实现缓存模拟器-csim>实现缓存模拟器 csim</a></li></ul></li></ul></nav></div><hr>
 <div class=markdown>
-<h2 id=计算机的存储结构>计算机的存储结构</h2>
-<p>在 CPU 的简单模型中，存储器系统是一个线性的字节数组，CPU 能够在常数时间内访问它，而实际上存储器系统是一个具有多种容量、成本、访问时间的存储设备的层次结构。</p>
-<p>计算机程序具有“局部性”的特点，即程序倾向于一次又一次访问相同的数据项集合，或者倾向于访问邻近的数据项集合，因此我们可以使用具有较小访问时间的存储设备缓存这些频繁访问的数据，从而能够提高程序的运行时间。</p>
-<h3 id=局部性>局部性</h3>
-<p>局部性分为“时间局部性”和“空间局部性”，时间局部性指被引用过一次的内存位置很可能在不远的将在被再次引用，空间局部性指如果一个内存位置被引用了一次，那么程序可能在不远的将来引用附近的一个内存位置。</p>
-<p>程序应该合理使用这两个局部性，因为不管是计算机系统还是操作系统，都尽可能利用程序的局部性设计缓存结构提高数据的访问速度。</p>
-<p>程序对内存使用的局部性体现为对每个变量的引用模式</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#2b91af>int</span> sumvec(<span style=color:#2b91af>int</span> v[N]) {
-  <span style=color:#2b91af>int</span> i, sum = 0;
-  <span style=color:#00f>for</span> (i = 0; i &lt; N; ++i) {
-    sum += v[i];
-  }
-  <span style=color:#00f>return</span> sum;
-}
-</code></pre></div><p>sumvec 函数对 sum 变量的访问符合时间局部性，对向量 v 的元素是按照在内存中存储的顺序读取的，因此，对于变量 v，函数有很好的空间局部性。</p>
-<p>对于像这种顺序访问一个向量的元素的函数，具有<code>步长为 1 的引用模式</code>，也称之为<code>顺序引用模式</code>，如果步长为 k，即每隔 k 个元素进行访问，就称之为<code>步长为 k 的引用模式</code>，随着步长的提高，空间局部性也就下降。</p>
-<p>而对于取指令的局部性，循环体具有较好的时间局部性和空间局部性。通常循环体越小，局部性越好。</p>
-<h3 id=缓存>缓存</h3>
-<p>在存储器层次中，高一级的存储设备通常是低一级存储设备的缓存，每级存储设备之间以“块”为单位转移数据。当程序需要第 k + 1 级的数据时，首先会在第 k 级的一个块中寻找数据，找到的结果分为若干情况：</p>
-<ol>
+<h2 id=计算机的存储结构>计算机的存储结构</h2><p>在 CPU 的简单模型中，存储器系统是一个线性的字节数组，CPU 能够在常数时间内访问它，而实际上存储器系统是一个具有多种容量、成本、访问时间的存储设备的层次结构。</p><p>计算机程序具有“局部性”的特点，即程序倾向于一次又一次访问相同的数据项集合，或者倾向于访问邻近的数据项集合，因此我们可以使用具有较小访问时间的存储设备缓存这些频繁访问的数据，从而能够提高程序的运行时间。</p><h3 id=局部性>局部性</h3><p>局部性分为“时间局部性”和“空间局部性”，时间局部性指被引用过一次的内存位置很可能在不远的将在被再次引用，空间局部性指如果一个内存位置被引用了一次，那么程序可能在不远的将来引用附近的一个内存位置。</p><p>程序应该合理使用这两个局部性，因为不管是计算机系统还是操作系统，都尽可能利用程序的局部性设计缓存结构提高数据的访问速度。</p><p>程序对内存使用的局部性体现为对每个变量的引用模式</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#2b91af>int</span> sumvec(<span style=color:#2b91af>int</span> v[N]) {
+</span></span><span style=display:flex><span>  <span style=color:#2b91af>int</span> i, sum = 0;
+</span></span><span style=display:flex><span>  <span style=color:#00f>for</span> (i = 0; i &lt; N; ++i) {
+</span></span><span style=display:flex><span>    sum += v[i];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#00f>return</span> sum;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>sumvec 函数对 sum 变量的访问符合时间局部性，对向量 v 的元素是按照在内存中存储的顺序读取的，因此，对于变量 v，函数有很好的空间局部性。</p><p>对于像这种顺序访问一个向量的元素的函数，具有<code>步长为 1 的引用模式</code>，也称之为<code>顺序引用模式</code>，如果步长为 k，即每隔 k 个元素进行访问，就称之为<code>步长为 k 的引用模式</code>，随着步长的提高，空间局部性也就下降。</p><p>而对于取指令的局部性，循环体具有较好的时间局部性和空间局部性。通常循环体越小，局部性越好。</p><h3 id=缓存>缓存</h3><p>在存储器层次中，高一级的存储设备通常是低一级存储设备的缓存，每级存储设备之间以“块”为单位转移数据。当程序需要第 k + 1 级的数据时，首先会在第 k 级的一个块中寻找数据，找到的结果分为若干情况：</p><ol>
 <li>
-<p>缓存命中</p>
-<p>如果数据刚好在第 k 级缓存，我们称之为“缓存命中”</p>
-</li>
-<li>
-<p>缓存不命中</p>
-<p>如果在第 k 层没有缓存数据对象 d，那么发生缓存不命中，需要从第 k + 1 层中取出包含数据的块，并覆盖第 k 层现有的一个块，称之为“替换”或者“驱逐”，决定替换哪个块是由缓存的替换策略决定的，例如随机替换或者 LRU 替换。</p>
-<p>缓存不命中分为若干种类型：</p>
-<ol>
-<li>冷缓存：缓存初始为空，必不命中</li>
-<li>冲突不命中：为了加快访问速度，一般会以某种策略规定第 k + 1 的某些块固定放在第 k 级的某些块中。这样限制性的访问策略会导致程序在频繁访问某些固定放在一起的数据时，会出现一直不命中的现象。</li>
-<li>容量不命中：程序在每个阶段访问缓存块的某个相对稳定不变的集合称为工作集，如果工作集的大小超过了缓存的大小时，缓存就会经历容量不命中。</li>
-</ol>
-</li>
-</ol>
-<h3 id=高速缓存存储器>高速缓存存储器</h3>
-<p>早期的存储器结构只有三层：CPU 寄存器、DRAM 主存储器和磁盘存储器，随着 CPU 与 DRAM 的速度差距越来越大，CPU 内部逐渐加上了 L1、L2、L3 级高速缓存</p>
-<p>高速缓存的通用组织结构如下图所示：</p>
-<p><img src=general-cache.png alt></p>
-<p>每个高速缓存可以用（S、E、B、m）四元组表示，高速缓存的大小 $C = S \times E \times B$，E 为每组包含的高速缓存行（cache line）的行数。</p>
-<p>根据四元组不同的值，高速缓存也可以被分为不同的类型</p>
-<blockquote>
-<p>为什么要用中间的位作为组索引，而不是用高位来做索引？是因为如果用高位做索引，一些连续的内存块就会映射到相同的高速缓存块中。如果一个程序有良好的局部性，那么就会导致高速缓存块的使用率会很低。</p>
-</blockquote>
-<h4 id=直接相连高速缓存>直接相连高速缓存</h4>
-<p>E = 1，每组只有一行 cache line。当 CPU 执行读内存地址 w 时，会在缓存内将地址划分成标记、组索引和块偏移三部分，并确认是否缓存命中🎯</p>
-<ol>
-<li>组选择，通过组索引确定相应的组</li>
-<li>行匹配，由于每个组只有一行，我们只需要判断行有效位是否有效，且标记是否与地址内的标记相同，如果相同，就代表命中，如果行无效或者标记不匹配，则请求不命中</li>
-<li>字选择，使用块偏移找到对应位置的字节</li>
-</ol>
-<p>如果发生命中，就直接从缓存中取出数据。如果不命中，则需要从低一级的存储设备中取出副本，替换缓存中的某个块。</p>
-<p>我们将标记位和索引位连起来称之为一个块，因此对于 (S, E, B, m) = (4, 1, 2, 4) 的直接映射缓存来说，地址划分如下所示：</p>
-<p><img src=direct-map-address.png alt></p>
-<p>可以看到有8个块号，但是映射到了四个缓存组，所以多个块会映射到同一个高速缓存组中，很容易出现缓存抖动的现象，即每发生一次不命中，如果两个地址都映射到了同一个缓存组里面，都要把组中所有字节都替换掉。</p>
-<p>为什么要用中间位来作为高速缓存组的索引，而不是头部几位，是为了将内存连续的几块分布到不同的缓存组中，从而避免发生频繁的替换。</p>
-<h4 id=组相连高速缓存>组相连高速缓存</h4>
-<p>组相连高速缓存的特征是 1 &lt; E &lt; C/B，称为 E 路组相连高速缓存，即每组高速缓存内部有 E 行</p>
-<p>它和直接映射的区别在于在行匹配的时候需要查找组里的所有行，找到一个有效且标记位与地址中的标记位相同的高速缓存行。</p>
-<p>如果发生不命中，就需要替换组内的某一行，如果组中没有空行，就需要使用一定的算法替换掉某一行。根据局部性原理，我们可以使用 LFU 去替换在过去某个时间窗口内引用次数最少的那一行，LRU 替换最后一次访问时间最久的那一行。</p>
-<h4 id=全相联高速缓存>全相联高速缓存</h4>
-<p>全相联高速缓存 E = C / B，即只有一个组，因此地址中没有组索引位。其索引的方式和组相连高速缓存类似，区别只是规模大小的问题。因为高速缓存并行地搜索许多相匹配的标记，因此全相联高速缓存只适用于做小的高速缓存，例如 TLB 等。</p>
-<h3 id=写缓存>写缓存</h3>
-<p>高速缓存对于写的处理要更复杂一点，假设我们已经写了一个缓存了的字节（写命中），在高速缓存内部更新之后，怎么更新低一级的副本呢？</p>
-<ul>
-<li>直写（write-through），每次立即将缓存更新到低一层中，虽然简单，但是每一次都会发起总线请求</li>
-<li>写回（write-back），推迟更新，只有当替换算法要驱逐这个更新过的块后，才会把这个块写入的低一层中，这种减少了总线请求，但是要求高速缓存必须为每个 cache line 维护一个额外的修改位，表明是否被修改过</li>
-</ul>
-<p>如果发生了写不命中怎么办，即写入的地址不在缓存当中？</p>
-<ul>
-<li>写分配（write-allocate），加载相应的低一级的块到高速缓存中，然后更新高速缓存。这种方法试图利用写的局部性，但是每次不命中都会导致一个块从低一级到高一级传送。</li>
-<li>非写分配（non-write-allocate），避开高速缓存，直接将数据写入到低一级的设备中。</li>
-</ul>
-<p>通常直写是使用非写分配，而写回是使用写分配。</p>
-<h3 id=高速缓存不同参数对性能影响>高速缓存不同参数对性能影响</h3>
-<ul>
-<li>高速缓存的大小：较大的高速缓存可能会提升命中率，但是也会增加命中时间（需要寻找对应的 ca che line），将大缓存提高运行速度总是要难一些。</li>
-<li>块大小：在整体容量一定的情况下，大的块能够利用程序的空间局部性，但是块越大表明行数越小，更容易影响时间局部性的命中率，且不命中处罚时间也比较大。</li>
-<li>相连度：相连度越高会造成较高的成本，需要更多的标记位和额外的处理逻辑。较高的相连度会增加命中时间和不命中处罚，传统上层次较高的缓存会选择低相连度来提高时钟频率。</li>
-<li>写策略的影响：直写缓存比较容易实现，能够使用独立于高速缓存的写缓存区，将写内容更新到内存中，但是会占用一部分内存带宽。而写回缓存会减少传送，允许更多的内存带宽执行 DMA 操作，常用于较低层次的缓存中。</li>
-</ul>
-<h3 id=真实高速缓存的层次结构>真实高速缓存的层次结构</h3>
-<p>在真实 CPU 中，每个 CPU 都会有独立的指令缓存 i-cache 和数据缓存 d-cache，也有既存储数据，又存储指令的 unifed cache。两个独立的高速缓存能够保证指令和数据之间不会发生冲突不命中。</p>
-<p>在 Intel 的芯片中，通常有 L1、L2、L3 三级缓存</p>
-<p><img src=core-i7-structure.png alt></p>
-<h2 id=优化程序合理利用缓存>优化程序合理利用缓存</h2>
-<ul>
-<li>大部分计算和内存访问都在内循环里，因此集中优化内循环</li>
-<li>按照数据对象存储在内存中的顺序，以步长为 1 来读数据，从而使空间局部性最大</li>
-<li>一旦从存储器中读入了一个数据对象，就尽可能地多使用，从而使程序中的时间局部性最大</li>
-</ul>
-<h2 id=cachelab>cachelab</h2>
-<h3 id=实现缓存模拟器-csim>实现缓存模拟器 csim</h3>
-<blockquote>
-<p>读取 valgrind 生成的缓存 trace 文件，模拟不同参数下的缓存的读写情况，并最终打印出命中率/非命中率</p>
-</blockquote>
-<p>Valgrind 的 trace 文件格式如下</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>I 0400d7d4,8
-	M 0421c7f0,4
-	L 04f6b868,8
-	S 7ff0005c8,8
-</code></pre></div><p>表示 operation、address、size，M 表示数据更改，L 表示读取数据，S 表示写入数据，I 表示指令读取。</p>
-<p>csim 需要支持上述三种缓存架构存储器，支持指定 set_index, block_index 和 associativity （每个集合中有几个缓存行），注意 associativity 指定的 line 只是可以用来创建动态数组，在缓存地址中不存在 line 这个部分，只包含 set_index、block_index 和 tag</p>
-<h4 id=定义结构体>定义结构体</h4>
-<p>为了模拟缓存，我们需要定义 cache 各级的结构，在此处定义 cache_t、set_t、line_t ，每个 line_t 代表一个 block，表示一个 cache line。</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#00f>struct</span> line {
-    <span style=color:#2b91af>bool</span> valid;
-    <span style=color:#00f>struct</span> line *prev, *next;
-    ull tag;
-    <span style=color:#2b91af>uint8_t</span>* block;
-};
-
-<span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> line line_t;
-
-<span style=color:green>/**
-</span><span style=color:green> * @brief one set in a cache
-</span><span style=color:green> */</span>
-<span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> {
-    line_t* lines; 
-    line_t head, tail;
-} set_t;
-
-<span style=color:green>/**
-</span><span style=color:green> * @brief a cache
-</span><span style=color:green> */</span>
-<span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> {
-    set_t* sets;
-} cache_t;
-</code></pre></div><p>为了支持不同结构的 cache，cache_t 相关数据结构都使用动态分配，并注意在释放内存的需要检查是否分配，如果没分配就跳过释放。</p>
-<p>由于在每个 cache 满的时候需要选择一个缓存线进行替换，因此每个 line_t 还需要包含两个指针形成双向链表，便于实现 LRU 算法</p>
-<h4 id=仿真过程>仿真过程</h4>
-<p>由于 valgrind 产生的 trace 只包括 L、M、S 三种操作，整个仿真过程也就是围绕着这三个操作来分别处理。</p>
-<p>首先是判断 hit 的过程，在解析出地址对应的 set 编号、tag 后，就可以找到对应的 set_t，然后遍历这个 set 的所有 cache line，如果找到 tag 一致的，就表明 hit 了，注意 M 操作符下应该 hit 两次（等效于 load 和后面跟的 store 操作同一个地址）。如果没找到 tag 一致的，表明发生 miss，需要根据操作符进行讨论。</p>
-<ol>
-<li>L 操作符。Load 操作在 miss 情况下需要从低一级的 cache 中读取数据，并找到一个空的 cache line 放置数据，实际代码编写的时候只需要将该 cache line 的标志位设置为有效即可。如果没有空的 cache line，就需要使用 LRU 将最近最少使用的 cacheline 踢出去（eviction），将新的数据放在这个 cache line。</li>
-<li>S 操作符。和 Load 操作一样，根据文档中的描述和 csim-ref 的输出，写入操作使用的是写回，因此在 miss 的时候会使用写分配，即和 Load 操作一样从低一级的 cache 读取数据并写入 cache</li>
-<li>M 操作符。由于 Modify 操作等效于对同一个地址先进行 Load 操作，再进行 Store 操作，因此我们首先执行 Load 的 miss 操作，然后之后的 Store 操作一定会命中。</li>
-</ol>
-</div>
-<div class=tags>
+<p>缓存命中</p><p>如果数据刚好在第 k 级缓存，我们称之为“缓存命中”</p></li><li>
+<p>缓存不命中</p><p>如果在第 k 层没有缓存数据对象 d，那么发生缓存不命中，需要从第 k + 1 层中取出包含数据的块，并覆盖第 k 层现有的一个块，称之为“替换”或者“驱逐”，决定替换哪个块是由缓存的替换策略决定的，例如随机替换或者 LRU 替换。</p><p>缓存不命中分为若干种类型：</p><ol>
+<li>冷缓存：缓存初始为空，必不命中</li><li>冲突不命中：为了加快访问速度，一般会以某种策略规定第 k + 1 的某些块固定放在第 k 级的某些块中。这样限制性的访问策略会导致程序在频繁访问某些固定放在一起的数据时，会出现一直不命中的现象。</li><li>容量不命中：程序在每个阶段访问缓存块的某个相对稳定不变的集合称为工作集，如果工作集的大小超过了缓存的大小时，缓存就会经历容量不命中。</li></ol></li></ol><h3 id=高速缓存存储器>高速缓存存储器</h3><p>早期的存储器结构只有三层：CPU 寄存器、DRAM 主存储器和磁盘存储器，随着 CPU 与 DRAM 的速度差距越来越大，CPU 内部逐渐加上了 L1、L2、L3 级高速缓存</p><p>高速缓存的通用组织结构如下图所示：</p><p><img src=general-cache.png alt></p><p>每个高速缓存可以用（S、E、B、m）四元组表示，高速缓存的大小 $C = S \times E \times B$，E 为每组包含的高速缓存行（cache line）的行数。</p><p>根据四元组不同的值，高速缓存也可以被分为不同的类型</p><blockquote>
+<p>为什么要用中间的位作为组索引，而不是用高位来做索引？是因为如果用高位做索引，一些连续的内存块就会映射到相同的高速缓存块中。如果一个程序有良好的局部性，那么就会导致高速缓存块的使用率会很低。</p></blockquote><h4 id=直接相连高速缓存>直接相连高速缓存</h4><p>E = 1，每组只有一行 cache line。当 CPU 执行读内存地址 w 时，会在缓存内将地址划分成标记、组索引和块偏移三部分，并确认是否缓存命中🎯</p><ol>
+<li>组选择，通过组索引确定相应的组</li><li>行匹配，由于每个组只有一行，我们只需要判断行有效位是否有效，且标记是否与地址内的标记相同，如果相同，就代表命中，如果行无效或者标记不匹配，则请求不命中</li><li>字选择，使用块偏移找到对应位置的字节</li></ol><p>如果发生命中，就直接从缓存中取出数据。如果不命中，则需要从低一级的存储设备中取出副本，替换缓存中的某个块。</p><p>我们将标记位和索引位连起来称之为一个块，因此对于 (S, E, B, m) = (4, 1, 2, 4) 的直接映射缓存来说，地址划分如下所示：</p><p><img src=direct-map-address.png alt></p><p>可以看到有8个块号，但是映射到了四个缓存组，所以多个块会映射到同一个高速缓存组中，很容易出现缓存抖动的现象，即每发生一次不命中，如果两个地址都映射到了同一个缓存组里面，都要把组中所有字节都替换掉。</p><p>为什么要用中间位来作为高速缓存组的索引，而不是头部几位，是为了将内存连续的几块分布到不同的缓存组中，从而避免发生频繁的替换。</p><h4 id=组相连高速缓存>组相连高速缓存</h4><p>组相连高速缓存的特征是 1 &lt; E &lt; C/B，称为 E 路组相连高速缓存，即每组高速缓存内部有 E 行</p><p>它和直接映射的区别在于在行匹配的时候需要查找组里的所有行，找到一个有效且标记位与地址中的标记位相同的高速缓存行。</p><p>如果发生不命中，就需要替换组内的某一行，如果组中没有空行，就需要使用一定的算法替换掉某一行。根据局部性原理，我们可以使用 LFU 去替换在过去某个时间窗口内引用次数最少的那一行，LRU 替换最后一次访问时间最久的那一行。</p><h4 id=全相联高速缓存>全相联高速缓存</h4><p>全相联高速缓存 E = C / B，即只有一个组，因此地址中没有组索引位。其索引的方式和组相连高速缓存类似，区别只是规模大小的问题。因为高速缓存并行地搜索许多相匹配的标记，因此全相联高速缓存只适用于做小的高速缓存，例如 TLB 等。</p><h3 id=写缓存>写缓存</h3><p>高速缓存对于写的处理要更复杂一点，假设我们已经写了一个缓存了的字节（写命中），在高速缓存内部更新之后，怎么更新低一级的副本呢？</p><ul>
+<li>直写（write-through），每次立即将缓存更新到低一层中，虽然简单，但是每一次都会发起总线请求</li><li>写回（write-back），推迟更新，只有当替换算法要驱逐这个更新过的块后，才会把这个块写入的低一层中，这种减少了总线请求，但是要求高速缓存必须为每个 cache line 维护一个额外的修改位，表明是否被修改过</li></ul><p>如果发生了写不命中怎么办，即写入的地址不在缓存当中？</p><ul>
+<li>写分配（write-allocate），加载相应的低一级的块到高速缓存中，然后更新高速缓存。这种方法试图利用写的局部性，但是每次不命中都会导致一个块从低一级到高一级传送。</li><li>非写分配（non-write-allocate），避开高速缓存，直接将数据写入到低一级的设备中。</li></ul><p>通常直写是使用非写分配，而写回是使用写分配。</p><h3 id=高速缓存不同参数对性能影响>高速缓存不同参数对性能影响</h3><ul>
+<li>高速缓存的大小：较大的高速缓存可能会提升命中率，但是也会增加命中时间（需要寻找对应的 ca che line），将大缓存提高运行速度总是要难一些。</li><li>块大小：在整体容量一定的情况下，大的块能够利用程序的空间局部性，但是块越大表明行数越小，更容易影响时间局部性的命中率，且不命中处罚时间也比较大。</li><li>相连度：相连度越高会造成较高的成本，需要更多的标记位和额外的处理逻辑。较高的相连度会增加命中时间和不命中处罚，传统上层次较高的缓存会选择低相连度来提高时钟频率。</li><li>写策略的影响：直写缓存比较容易实现，能够使用独立于高速缓存的写缓存区，将写内容更新到内存中，但是会占用一部分内存带宽。而写回缓存会减少传送，允许更多的内存带宽执行 DMA 操作，常用于较低层次的缓存中。</li></ul><h3 id=真实高速缓存的层次结构>真实高速缓存的层次结构</h3><p>在真实 CPU 中，每个 CPU 都会有独立的指令缓存 i-cache 和数据缓存 d-cache，也有既存储数据，又存储指令的 unifed cache。两个独立的高速缓存能够保证指令和数据之间不会发生冲突不命中。</p><p>在 Intel 的芯片中，通常有 L1、L2、L3 三级缓存</p><p><img src=core-i7-structure.png alt></p><h2 id=优化程序合理利用缓存>优化程序合理利用缓存</h2><ul>
+<li>大部分计算和内存访问都在内循环里，因此集中优化内循环</li><li>按照数据对象存储在内存中的顺序，以步长为 1 来读数据，从而使空间局部性最大</li><li>一旦从存储器中读入了一个数据对象，就尽可能地多使用，从而使程序中的时间局部性最大</li></ul><h2 id=cachelab>cachelab</h2><h3 id=实现缓存模拟器-csim>实现缓存模拟器 csim</h3><blockquote>
+<p>读取 valgrind 生成的缓存 trace 文件，模拟不同参数下的缓存的读写情况，并最终打印出命中率/非命中率</p></blockquote><p>Valgrind 的 trace 文件格式如下</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>I 0400d7d4,8
+</span></span><span style=display:flex><span>	M 0421c7f0,4
+</span></span><span style=display:flex><span>	L 04f6b868,8
+</span></span><span style=display:flex><span>	S 7ff0005c8,8
+</span></span></code></pre></div><p>表示 operation、address、size，M 表示数据更改，L 表示读取数据，S 表示写入数据，I 表示指令读取。</p><p>csim 需要支持上述三种缓存架构存储器，支持指定 set_index, block_index 和 associativity （每个集合中有几个缓存行），注意 associativity 指定的 line 只是可以用来创建动态数组，在缓存地址中不存在 line 这个部分，只包含 set_index、block_index 和 tag</p><h4 id=定义结构体>定义结构体</h4><p>为了模拟缓存，我们需要定义 cache 各级的结构，在此处定义 cache_t、set_t、line_t ，每个 line_t 代表一个 block，表示一个 cache line。</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#00f>struct</span> line {
+</span></span><span style=display:flex><span>    <span style=color:#2b91af>bool</span> valid;
+</span></span><span style=display:flex><span>    <span style=color:#00f>struct</span> line *prev, *next;
+</span></span><span style=display:flex><span>    ull tag;
+</span></span><span style=display:flex><span>    <span style=color:#2b91af>uint8_t</span>* block;
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> line line_t;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:green>/**
+</span></span></span><span style=display:flex><span><span style=color:green> * @brief one set in a cache
+</span></span></span><span style=display:flex><span><span style=color:green> */</span>
+</span></span><span style=display:flex><span><span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> {
+</span></span><span style=display:flex><span>    line_t* lines; 
+</span></span><span style=display:flex><span>    line_t head, tail;
+</span></span><span style=display:flex><span>} set_t;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:green>/**
+</span></span></span><span style=display:flex><span><span style=color:green> * @brief a cache
+</span></span></span><span style=display:flex><span><span style=color:green> */</span>
+</span></span><span style=display:flex><span><span style=color:#00f>typedef</span> <span style=color:#00f>struct</span> {
+</span></span><span style=display:flex><span>    set_t* sets;
+</span></span><span style=display:flex><span>} cache_t;
+</span></span></code></pre></div><p>为了支持不同结构的 cache，cache_t 相关数据结构都使用动态分配，并注意在释放内存的需要检查是否分配，如果没分配就跳过释放。</p><p>由于在每个 cache 满的时候需要选择一个缓存线进行替换，因此每个 line_t 还需要包含两个指针形成双向链表，便于实现 LRU 算法</p><h4 id=仿真过程>仿真过程</h4><p>由于 valgrind 产生的 trace 只包括 L、M、S 三种操作，整个仿真过程也就是围绕着这三个操作来分别处理。</p><p>首先是判断 hit 的过程，在解析出地址对应的 set 编号、tag 后，就可以找到对应的 set_t，然后遍历这个 set 的所有 cache line，如果找到 tag 一致的，就表明 hit 了，注意 M 操作符下应该 hit 两次（等效于 load 和后面跟的 store 操作同一个地址）。如果没找到 tag 一致的，表明发生 miss，需要根据操作符进行讨论。</p><ol>
+<li>L 操作符。Load 操作在 miss 情况下需要从低一级的 cache 中读取数据，并找到一个空的 cache line 放置数据，实际代码编写的时候只需要将该 cache line 的标志位设置为有效即可。如果没有空的 cache line，就需要使用 LRU 将最近最少使用的 cacheline 踢出去（eviction），将新的数据放在这个 cache line。</li><li>S 操作符。和 Load 操作一样，根据文档中的描述和 csim-ref 的输出，写入操作使用的是写回，因此在 miss 的时候会使用写分配，即和 Load 操作一样从低一级的 cache 读取数据并写入 cache</li><li>M 操作符。由于 Modify 操作等效于对同一个地址先进行 Load 操作，再进行 Store 操作，因此我们首先执行 Load 的 miss 操作，然后之后的 Store 操作一定会命中。</li></ol></div><div class=tags>
 <ul class=flat>
-<li><a href=/tags/csapp>cs:app</a></li>
-<li><a href=/tags/cache>cache</a></li>
-</ul>
-</div></div>
-</div>
-<div class="footer wrapper">
+<li><a href=/tags/csapp>cs:app</a></li><li><a href=/tags/cache>cache</a></li></ul></div></div></div><div class="footer wrapper">
 <nav class=nav>
-<div>2021 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div>
-</nav>
-</div>
-<script>feather.replace()</script>
-</body>
-</html>
+<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
+</body></html>
