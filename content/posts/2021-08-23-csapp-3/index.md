@@ -78,7 +78,7 @@ echo:
 
 > 使用缓存区溢出使得getbuf返回时调用touch1函数
 
-当调用函数的时候（call指令），%rsp-=4，然后将被调用函数的下一个指令地址放到%rsp所指的位置。
+当函数 P 调用函数 Q 的时候（call指令），%rsp-=4，然后将 P 中调用函数 Q 的下一个指令地址作为返回地址放到%rsp所指的位置。
 
 ```c
 void test()
@@ -120,9 +120,9 @@ void touch2(unsigned val)
 
 ret 会将栈顶的值，即 %rsp 指向的值作为函数返回地址，因此我们需要在自己的代码中存放touch2 的地址，并通过代码设置 %rsp 指向存放地址的位置。
 
-我们字符串的结构如下
+栈覆盖之后的结构如图所示
 
-![image-20210823151210888](phase2.jpg)
+![image-20210823151210888](phase2.png)
 
 因此我们的自定义“攻击代码”如下
 
@@ -152,8 +152,8 @@ ret
 整个执行流程为：
 
 1. getbuf 函数写入字符串，将原本的返回地址覆盖，变成 0x5561dc8c
-2. getbuf 函数返回，%rsp=0x5561dca0，执行 ret 指令，%rip=0x5561dc8c，%rsp=0x5561dca8
-3. 跳转到代码区，执行指令，设置 %rdi 寄存器，并将 %rsp-0x10=0x5561dc98，执行 ret指令，弹出 touch2 函数地址，跳转到 touch2 函数
+2. getbuf 函数返回，%rsp=0x5561dca0，执行 ret 指令，%rip=0x5561dc8c，%rsp += 8，等于 0x5561dca8
+3. 执行自定义的指令，设置 %rdi 寄存器，并将 %rsp-0x10=0x5561dc98，执行 ret指令，弹出 touch2 函数地址，跳转到 touch2 函数
 
 此种方法只适用于关闭栈随机化的情况，如果开启栈随机化，每次 %rsp 的值是不确定的，我们就无法得知代码区的实际位置，也就无法向 getbuf 返回地址处写入代码区的地址。
 
@@ -184,7 +184,7 @@ sub $0x10, %rsp; 由于在弹出getbuf返回地址后，%rsp指向返回地址�
 ret
 ```
 
-注意由于 touch3 会调用 hexmatch，而这两个函数均会移动 %rsp 指针，因此如果按照 phase 2 的做法将字符串紧挨代码区放置，因为 hexmatch 会 %rsp-0x80，而移动后栈中的数据就会被覆盖，我们的字符串内容也会被覆盖，因此我们需要在getbuf返回地址的后面追加字符串。
+注意由于 touch3 会调用 hexmatch，而这两个函数均会移动 %rsp 指针，因此如果按照 phase 2 的做法将字符串紧挨代码区放置，因为 hexmatch 会 %rsp-0x80，而移动后栈中的数据就会被覆盖，我们的字符串内容也会被覆盖，因此我们需要从getbuf返回地址向上追加字符串。
 
 所以 addr = getbuf 返回地址+8 = 0x5561dca0 + 8 = 0x5561dca8。字符串构成为
 
@@ -208,7 +208,7 @@ rtarget 的任务就是利用 rop 技术实现 ctarget 中的 level 2 和 level 
 
 <img src="phase4.png" style="zoom:50%;" />
 
-gadget 1 指令为 `popq %rax`， 将 cookie 值放入到寄存器中，然后 gadget 2 指令为 `mov %rax %rdi`。
+gadget 1 指令为 `popq %rax`， 将 cookie 值弹出放入到寄存器 %rax 中，然后 gadget 2 指令为 `mov %rax %rdi`。
 
 根据文档附录给的指令表格，在 rtarget 反汇编中搜索相关指令，找到 gadget 1 指令地址为 0x4019ab，gadget 2 指令地址为 0x4019a2。
 

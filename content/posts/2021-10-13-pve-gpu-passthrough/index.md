@@ -19,7 +19,7 @@ PVE版本：6.4
 
 ## 配置步骤
 
-首先需要更新主板的 BIOS 到最新版本，然后开启主办的虚拟化功能，包括 VT-d、IOMMU、CPU 虚拟化，关闭 CSM，然后最好将主板的首选显卡改为 PEG。
+首先需要更新主板的 BIOS 到最新版本，然后开启主板的虚拟化功能，包括 VT-d、IOMMU、CPU 虚拟化，关闭 CSM，然后最好将主板的首选显卡改为 PEG。
 
 然后按照 PVE 官方的[教程](https://pve.proxmox.com/wiki/Pci_passthrough)配置到 `Verify IOMMU Isolation` 这一步，在 PVE 中使用下面脚本检查是否显卡在一个单独的 IOMMU 组里
 
