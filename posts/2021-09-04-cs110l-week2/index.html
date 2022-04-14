@@ -1,57 +1,8 @@
-<!doctype html><html>
-<head>
-<meta charset=utf-8>
-<meta http-equiv=x-ua-compatible content="IE=edge"><title>CS110L Week 2 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
-<meta itemprop=name content="CS110L Week 2">
-<meta itemprop=description content="磨人的 Rust 资源所有权"><meta itemprop=datePublished content="2021-09-04T10:08:48+08:00">
-<meta itemprop=dateModified content="2021-09-04T10:08:48+08:00">
-<meta itemprop=wordCount content="300">
-<meta itemprop=keywords content="Rust,CS110L,"><meta property="og:title" content="CS110L Week 2">
-<meta property="og:description" content="磨人的 Rust 资源所有权">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://lza852.com/posts/2021-09-04-cs110l-week2/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2021-09-04T10:08:48+08:00">
-<meta property="article:modified_time" content="2021-09-04T10:08:48+08:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="CS110L Week 2">
-<meta name=twitter:description content="磨人的 Rust 资源所有权">
-<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css>
-<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css>
-<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/main.css>
-<link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
-<script src=https://lza852.com/js/feather.min.js></script>
+<!doctype html><html><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><title>CS110L Week 2 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1"><meta itemprop=name content="CS110L Week 2"><meta itemprop=description content="磨人的 Rust 资源所有权"><meta itemprop=datePublished content="2021-09-04T10:08:48+08:00"><meta itemprop=dateModified content="2021-09-04T10:08:48+08:00"><meta itemprop=wordCount content="300"><meta itemprop=keywords content="Rust,CS110L,"><meta property="og:title" content="CS110L Week 2"><meta property="og:description" content="磨人的 Rust 资源所有权"><meta property="og:type" content="article"><meta property="og:url" content="https://lza852.com/posts/2021-09-04-cs110l-week2/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-09-04T10:08:48+08:00"><meta property="article:modified_time" content="2021-09-04T10:08:48+08:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="CS110L Week 2"><meta name=twitter:description content="磨人的 Rust 资源所有权"><link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css><link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css><link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/main.css><link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css><script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-<script>MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}},window.addEventListener("load",e=>{document.querySelectorAll("mjx-container").forEach(function(e){e.parentElement.classList+="has-jax"})})</script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
-</head><body>
-<div class="container wrapper">
-<div class=header>
-<div class=avatar>
-<a href=https://lza852.com/>
-<img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
-</a>
-</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
-<ul class=flat>
-</ul></nav></div><div class=post>
-<div class=post-header>
-<div class=meta>
-<div class=date>
-<span class=day>04</span>
-<span class=rest>Sep 2021</span>
-</div></div><div class=matter>
-<h1 class=title>CS110L Week 2</h1></div></div><div>
-<nav id=TableOfContents>
-<ul>
-<li><a href=#rust-资源的所有权>Rust 资源的所有权</a>
-<ul>
-<li><a href=#代码示例>代码示例</a></li></ul></li><li><a href=#rust-的错误处理>Rust 的错误处理</a></li><li><a href=#rdiff>rdiff</a>
-<ul>
-<li><a href=#文件读取>文件读取</a></li><li><a href=#范围>范围</a></li><li><a href=#lcs>LCS</a></li></ul></li><li><a href=#小感想>小感想</a></li></ul></nav></div><hr>
-<div class=markdown>
-<h2 id=rust-资源的所有权>Rust 资源的所有权</h2><p>Rust 中每个变量都有生命周期和所有权，在创建引用的时候，相当于所有权借用（borrow），编译器会要求程序正确处理资源的所有权。</p><p>所有权借用图示流程可以参考<a href=https://www.notion.so/Rust-94aebbb2df77462bbc20b5536c611106#878feb4fbe6b4764874c06760874bf9f>这篇文章</a>。这里贴一张里面的图片，比较清楚的展示所有权的借用过程</p><p><img src=rust-move-copy-borrow.png alt></p><p>总结下来就是</p><ol>
-<li>引用的生命周期不能超过原资源的生命周期，且引用不能被移动</li><li>可变引用和不可变引用不能共存，可以同时创建多个不可变引用，但是可变引用只能创建一个，并可以降级为不可变引用。</li><li>不可变引用的时候，原资源能拷贝，但不能移动</li><li>可变引用的时候，原资源不能拷贝，也不能移动</li></ol><p>当使用值或者引用的形式作为参数传给函数时，对应的使用权也会转移到函数内部。即如果传递值，则相对应的资源所有权就传递到函数内，除非函数再将所有权返回，否则在函数调用者一侧就无法再次使用该资源。</p><h3 id=代码示例>代码示例</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>fn</span> main() {
+<script>MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}},window.addEventListener("load",e=>{document.querySelectorAll("mjx-container").forEach(function(e){e.parentElement.classList+="has-jax"})})</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script></head><body><div class="container wrapper"><div class=header><div class=avatar><a href=https://lza852.com/><img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei"></a></div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social"><ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav><ul class=flat></ul></nav></div><div class=post><div class=post-header><div class=meta><div class=date><span class=day>04</span>
+<span class=rest>Sep 2021</span></div></div><div class=matter><h1 class=title>CS110L Week 2</h1></div></div><div><nav id=TableOfContents><ul><li><a href=#rust-资源的所有权>Rust 资源的所有权</a><ul><li><a href=#代码示例>代码示例</a></li></ul></li><li><a href=#rust-的错误处理>Rust 的错误处理</a></li><li><a href=#rdiff>rdiff</a><ul><li><a href=#文件读取>文件读取</a></li><li><a href=#范围>范围</a></li><li><a href=#lcs>LCS</a></li></ul></li><li><a href=#小感想>小感想</a></li></ul></nav></div><hr><div class=markdown><h2 id=rust-资源的所有权>Rust 资源的所有权</h2><p>Rust 中每个变量都有生命周期和所有权，在创建引用的时候，相当于所有权借用（borrow），编译器会要求程序正确处理资源的所有权。</p><p>所有权借用图示流程可以参考<a href=https://www.notion.so/Rust-94aebbb2df77462bbc20b5536c611106#878feb4fbe6b4764874c06760874bf9f>这篇文章</a>。这里贴一张里面的图片，比较清楚的展示所有权的借用过程</p><p><img src=rust-move-copy-borrow.png alt></p><p>总结下来就是</p><ol><li>引用的生命周期不能超过原资源的生命周期，且引用不能被移动</li><li>可变引用和不可变引用不能共存，可以同时创建多个不可变引用，但是可变引用只能创建一个，并可以降级为不可变引用。</li><li>不可变引用的时候，原资源能拷贝，但不能移动</li><li>可变引用的时候，原资源不能拷贝，也不能移动</li></ol><p>当使用值或者引用的形式作为参数传给函数时，对应的使用权也会转移到函数内部。即如果传递值，则相对应的资源所有权就传递到函数内，除非函数再将所有权返回，否则在函数调用者一侧就无法再次使用该资源。</p><h3 id=代码示例>代码示例</h3><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#00f>fn</span> main() {
 </span></span><span style=display:flex><span>    <span style=color:#00f>let</span> s1 = String::from(<span style=color:#a31515>&#34;hello&#34;</span>);
 </span></span><span style=display:flex><span>    <span style=color:#00f>let</span> <span style=color:#00f>mut</span> v = Vec::new();
 </span></span><span style=display:flex><span>    v.push(s1);
@@ -116,9 +67,4 @@ D[x - 1, y - 1] & \text{if } str1[x] = str2[y] \
 max{D[x-1, y], D[x, y-1]} & \text{if } str1[x] \ne str2[y]
 \end{cases}
 $$
-如果想要得到具体的公共子序列，可以按照计算的顺序倒序找到子序列</p><p><img src=lcs-table.png alt=image-20210905110825008></p><p>图中黄色的就是获得 LCS 的路径。如果用到 diff 当中，如果从$D[x, y] => D[x-1, y]$，则表明 Y[y] 是多余的字符，同理如果向上👆，则表明 X[x] 时多余的字符。</p><h4 id=优化方法>优化方法</h4><p>由于动态规划只需要数组的当前行和上一行，因此我们可以使用两个滚动数组存储计算的中间值，而不是用一整个方阵。</p><p>对于代码这种整行的字符串比较，我们可以使用字符串的 hash 值进行比较，减少所需要比较的字符串长度和数量，虽然 hash 算法会存在碰撞的风险，我们可以选择使用密码学的 hash 算法进行计算。</p><p>可以使用递归来让打印路径，如果不想使用递归，也可以在动态规划的时候记录当前位置的上一个的位置，最后再进行遍历。</p><h4 id=hunt-szymanski-算法>Hunt-Szymanski 算法</h4><p>时间复杂度 O(nlogn)，最坏复杂度O(n^2logn)</p><p>// TODO</p><p><a href=https://codeforces.com/blog/entry/91581>https://codeforces.com/blog/entry/91581</a></p><h2 id=小感想>小感想</h2><p>在做这些小项目的时候，都是有明确的步骤，有搭好的框架进行填充，还有简单的测试快速得到反馈。在实现自己的项目的时候，也可以按照这样，先明确好需求和所拥有的接口，然后编写简单的测试，有点类似 TDD 的思路，能够及时得到正反馈。</p></div><div class=tags>
-<ul class=flat>
-<li><a href=/tags/rust>Rust</a></li><li><a href=/tags/cs110l>CS110L</a></li></ul></div></div></div><div class="footer wrapper">
-<nav class=nav>
-<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
-</body></html>
+如果想要得到具体的公共子序列，可以按照计算的顺序倒序找到子序列</p><p><img src=lcs-table.png alt=image-20210905110825008></p><p>图中黄色的就是获得 LCS 的路径。如果用到 diff 当中，如果从$D[x, y] => D[x-1, y]$，则表明 Y[y] 是多余的字符，同理如果向上👆，则表明 X[x] 时多余的字符。</p><h4 id=优化方法>优化方法</h4><p>由于动态规划只需要数组的当前行和上一行，因此我们可以使用两个滚动数组存储计算的中间值，而不是用一整个方阵。</p><p>对于代码这种整行的字符串比较，我们可以使用字符串的 hash 值进行比较，减少所需要比较的字符串长度和数量，虽然 hash 算法会存在碰撞的风险，我们可以选择使用密码学的 hash 算法进行计算。</p><p>可以使用递归来让打印路径，如果不想使用递归，也可以在动态规划的时候记录当前位置的上一个的位置，最后再进行遍历。</p><h4 id=hunt-szymanski-算法>Hunt-Szymanski 算法</h4><p>时间复杂度 O(nlogn)，最坏复杂度O(n^2logn)</p><p>// TODO</p><p><a href=https://codeforces.com/blog/entry/91581>https://codeforces.com/blog/entry/91581</a></p><h2 id=小感想>小感想</h2><p>在做这些小项目的时候，都是有明确的步骤，有搭好的框架进行填充，还有简单的测试快速得到反馈。在实现自己的项目的时候，也可以按照这样，先明确好需求和所拥有的接口，然后编写简单的测试，有点类似 TDD 的思路，能够及时得到正反馈。</p></div><div class=tags><ul class=flat><li><a href=/tags/rust>Rust</a></li><li><a href=/tags/cs110l>CS110L</a></li></ul></div></div></div><div class="footer wrapper"><nav class=nav><div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script></body></html>

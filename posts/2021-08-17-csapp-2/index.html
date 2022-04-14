@@ -1,61 +1,8 @@
-<!doctype html><html>
-<head>
-<meta charset=utf-8>
-<meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第三章 & bomblab 记录 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1">
-<meta itemprop=name content="cs:app 第三章 & bomblab 记录">
-<meta itemprop=description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><meta itemprop=datePublished content="2021-08-17T10:22:36+08:00">
-<meta itemprop=dateModified content="2021-08-17T10:22:36+08:00">
-<meta itemprop=wordCount content="2836">
-<meta itemprop=keywords content><meta property="og:title" content="cs:app 第三章 & bomblab 记录">
-<meta property="og:description" content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://lza852.com/posts/2021-08-17-csapp-2/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2021-08-17T10:22:36+08:00">
-<meta property="article:modified_time" content="2021-08-17T10:22:36+08:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="cs:app 第三章 & bomblab 记录">
-<meta name=twitter:description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”">
-<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css>
-<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css>
-<link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/main.css>
-<link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css>
-<script src=https://lza852.com/js/feather.min.js></script>
+<!doctype html><html><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><title>cs:app 第三章 & bomblab 记录 - Justin Lei</title><meta name=viewport content="width=device-width,initial-scale=1"><meta itemprop=name content="cs:app 第三章 & bomblab 记录"><meta itemprop=description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><meta itemprop=datePublished content="2021-08-17T10:22:36+08:00"><meta itemprop=dateModified content="2021-08-17T10:22:36+08:00"><meta itemprop=wordCount content="2836"><meta itemprop=keywords content><meta property="og:title" content="cs:app 第三章 & bomblab 记录"><meta property="og:description" content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><meta property="og:type" content="article"><meta property="og:url" content="https://lza852.com/posts/2021-08-17-csapp-2/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-08-17T10:22:36+08:00"><meta property="article:modified_time" content="2021-08-17T10:22:36+08:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="cs:app 第三章 & bomblab 记录"><meta name=twitter:description content="x86-64汇编语言学习，人肉翻译汇编拆“炸弹”"><link href="https://fonts.googleapis.com/css?family=Playfair+Display:700" rel=stylesheet type=text/css><link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/normalize.css><link rel=stylesheet type=text/css media=screen href=https://lza852.com/css/main.css><link id=dark-scheme rel=stylesheet type=text/css href=https://lza852.com/css/dark.css><script src=https://lza852.com/js/feather.min.js></script>
 <script src=https://lza852.com/js/main.js></script>
-<script>MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}},window.addEventListener("load",e=>{document.querySelectorAll("mjx-container").forEach(function(e){e.parentElement.classList+="has-jax"})})</script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
-</head><body>
-<div class="container wrapper">
-<div class=header>
-<div class=avatar>
-<a href=https://lza852.com/>
-<img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei">
-</a>
-</div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social">
-<ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav>
-<ul class=flat>
-</ul></nav></div><div class=post>
-<div class=post-header>
-<div class=meta>
-<div class=date>
-<span class=day>17</span>
-<span class=rest>Aug 2021</span>
-</div></div><div class=matter>
-<h1 class=title>cs:app 第三章 & bomblab 记录</h1></div></div><div>
-<nav id=TableOfContents>
-<ul>
-<li><a href=#程序代码的汇编表示>程序代码的汇编表示</a>
-<ul>
-<li><a href=#寄存器>寄存器</a></li><li><a href=#att与intel格式的区别>ATT与Intel格式的区别</a></li><li><a href=#常见指令>常见指令</a></li><li><a href=#栈帧>栈帧</a></li><li><a href=#结构体>结构体</a></li><li><a href=#条件分支>条件分支</a></li><li><a href=#循环>循环</a></li></ul></li><li><a href=#bomb-lab>bomb lab</a>
-<ul>
-<li><a href=#常用gdb调试命令>常用gdb调试命令</a></li><li><a href=#phase-1>phase 1</a></li><li><a href=#phase-2>phase 2</a></li><li><a href=#phase-3>phase 3</a></li><li><a href=#phase-4>phase 4</a></li><li><a href=#phase-5>phase 5</a></li><li><a href=#phase-6>phase 6</a></li><li><a href=#secret_phase>secret_phase</a></li></ul></li></ul></nav></div><hr>
-<div class=markdown>
-<p><a href=https://github.com/zianglei/csapp-labs>这里</a>可以找到实验代码</p><h2 id=程序代码的汇编表示>程序代码的汇编表示</h2><h3 id=寄存器>寄存器</h3><h4 id=整数寄存器>整数寄存器</h4><img src=x86-64-registers.png alt=image-20210817103601810 style=zoom:50%>
-<h4 id=条件码寄存器>条件码寄存器</h4><ul>
-<li>CF：进位标志，表示最高位产生了进位</li><li>ZF：零标志，最近的操作结果为0</li><li>SF：符号标志，最近的操作结果为负数</li><li>OF：溢出标志，导致补码溢出，正溢出或负溢出</li></ul><h4 id=栈寄存器>栈寄存器</h4><p>栈指针 %rsp 保存栈顶元素的数据，将数据压入栈是将 %rsp-8，然后存储数据；弹出栈是将 M[%rsp] 取出，然后%rsp+8。</p><p>编译器会为每个函数计算需要的栈空间，然后在函数的开头对%rsp进行减操作，分配栈空间，在函数结束返回的时候对%rsp加操作，恢复栈空间</p><h4 id=pc寄存器>pc寄存器</h4><p>%rip 代表指令计数器，表示当前执行指令的地址</p><h3 id=att与intel格式的区别>ATT与Intel格式的区别</h3><p>ATT是AT&T提出的汇编代码格式，GCC、OBJDUMP等工具的默认格式。而Intel格式是Intel提出的，通常用于Microsoft的工具和Intel自身的文档。</p><p>两者区别是</p><ul>
-<li>Intel省略了指示大小的后缀，例如l，q等</li><li>Intel省略了寄存器的‘%’前缀</li><li>Intel使用QWORD PTR [rbx]来表示内存位置，而不是(rbx)这种形式</li><li>在带有多个操作数的情况下，操作数的顺序相反，即目的寄存器在前，源寄存器在后。</li></ul><p>在gcc生成汇编代码的时候，可以使用<code>-masm=intel</code>选项指定生成Intel格式的汇编代码，默认是ATT格式。</p><h3 id=常见指令>常见指令</h3><h4 id=条件指令>条件指令</h4><p><img src=condition-instructions.png alt=img></p><p>常见TEST %rax, %rax，判断%rax是否等于0，如果等于0，会设置ZF标志位，如果后跟je指令，就满足条件，跳转</p><h4 id=跳转指令>跳转指令</h4><p><img src=x86-64-jmp.png alt></p><p>在跳转的时候，有些指令会采用PC相对寻址，即指令编码中只记录offset，实际跳转的目的指令地址是next PC + offset，即下一条指令地址+offset，而不是当前PC的值</p><h4 id=算术运算>算术运算</h4><p>add S,D -> D = D + S</p><p>sub S,D -> D = D - S</p><h4 id=数据传送>数据传送</h4><p>mov S,D -> D = S</p><p>注意movl传送四字节，会将高位四字节设置为0，这样是因为 x86-64 的惯例是任何为寄存器生成 32 位值的指令都会把该寄存器的高位部分置成0。</p><h4 id=读取有效地址>读取有效地址</h4><p>lea并不会从指定地址读取数据到目的位置，而是将地址存储到目的位置</p><h4 id=操作数格式>操作数格式</h4><p><img src=x86-64-imm.png alt></p><h3 id=栈帧>栈帧</h3><img src=x86-64-stack.png style=zoom:50%>
-<p>x86-64提供六个寄存器用于函数参数传递（%rdi, %rsi, %rdx, %rcx, %r8, %r9），每一个调用的函数都会事先在栈上开辟空间，填入需要存储的变量。%rsp 指向栈顶位置，可以通过 pushq 和 popq 指令对 %rsp 进行操作。当函数 P 调用函数 Q 时，函数 P 会首先将函数 Q 执行完毕后的返回地址压入栈，通常返回地址是调用函数 Q 语句的下一个执行语句地址。</p><p>进入函数 Q 后，通常第一步就是事先分配栈空间，保存寄存器的值，分配局部变量，或者为函数 Q 调用的其他函数设置传递的参数。如果函数需要的参数非常多，六个寄存器不够放，那么就需要在调用者的栈中另外开辟空间，如图中的传入函数 Q 的参数7至参数n。</p><p>通常分配的栈空间是确定的，也就是在汇编代码里使用的是立即数，而对于需要使用变长栈帧的场景，例如需要动态分配栈空间，gcc会事先保存寄存器 %rbp 的值，然后将%rbp指向当前新的栈底。</p><img src=./x86-64-rbp-stack.png alt=可变栈帧 style=zoom:50%>
-<p>当进入新的函数时（call指令），返回地址被压入栈，在栈中的地址是 %rsp</p><h3 id=结构体>结构体</h3><p>对于</p><p><img src=struct.png alt></p><p>这样的结构体，假设%rdi存储结构体的地址，那么</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>movl (%rdi) %eax # %eax = st-&gt;i
+<script>MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre"]}},window.addEventListener("load",e=>{document.querySelectorAll("mjx-container").forEach(function(e){e.parentElement.classList+="has-jax"})})</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script></head><body><div class="container wrapper"><div class=header><div class=avatar><a href=https://lza852.com/><img src=https://avatars.githubusercontent.com/u/20857777 alt="Justin Lei"></a></div><h1 class=site-title><a href=https://lza852.com/>Justin Lei</a></h1><div class=site-description><p>Study forever</p><nav class="nav social"><ul class=flat><li><a href=https://github.com/zianglei title=Github><i data-feather=github></i></a></li></ul></nav></div><nav class=nav><ul class=flat></ul></nav></div><div class=post><div class=post-header><div class=meta><div class=date><span class=day>17</span>
+<span class=rest>Aug 2021</span></div></div><div class=matter><h1 class=title>cs:app 第三章 & bomblab 记录</h1></div></div><div><nav id=TableOfContents><ul><li><a href=#程序代码的汇编表示>程序代码的汇编表示</a><ul><li><a href=#寄存器>寄存器</a></li><li><a href=#att与intel格式的区别>ATT与Intel格式的区别</a></li><li><a href=#常见指令>常见指令</a></li><li><a href=#栈帧>栈帧</a></li><li><a href=#结构体>结构体</a></li><li><a href=#条件分支>条件分支</a></li><li><a href=#循环>循环</a></li></ul></li><li><a href=#bomb-lab>bomb lab</a><ul><li><a href=#常用gdb调试命令>常用gdb调试命令</a></li><li><a href=#phase-1>phase 1</a></li><li><a href=#phase-2>phase 2</a></li><li><a href=#phase-3>phase 3</a></li><li><a href=#phase-4>phase 4</a></li><li><a href=#phase-5>phase 5</a></li><li><a href=#phase-6>phase 6</a></li><li><a href=#secret_phase>secret_phase</a></li></ul></li></ul></nav></div><hr><div class=markdown><p><a href=https://github.com/zianglei/csapp-labs>这里</a>可以找到实验代码</p><h2 id=程序代码的汇编表示>程序代码的汇编表示</h2><h3 id=寄存器>寄存器</h3><h4 id=整数寄存器>整数寄存器</h4><img src=x86-64-registers.png alt=image-20210817103601810 style=zoom:50%><h4 id=条件码寄存器>条件码寄存器</h4><ul><li>CF：进位标志，表示最高位产生了进位</li><li>ZF：零标志，最近的操作结果为0</li><li>SF：符号标志，最近的操作结果为负数</li><li>OF：溢出标志，导致补码溢出，正溢出或负溢出</li></ul><h4 id=栈寄存器>栈寄存器</h4><p>栈指针 %rsp 保存栈顶元素的数据，将数据压入栈是将 %rsp-8，然后存储数据；弹出栈是将 M[%rsp] 取出，然后%rsp+8。</p><p>编译器会为每个函数计算需要的栈空间，然后在函数的开头对%rsp进行减操作，分配栈空间，在函数结束返回的时候对%rsp加操作，恢复栈空间</p><h4 id=pc寄存器>pc寄存器</h4><p>%rip 代表指令计数器，表示当前执行指令的地址</p><h3 id=att与intel格式的区别>ATT与Intel格式的区别</h3><p>ATT是AT&T提出的汇编代码格式，GCC、OBJDUMP等工具的默认格式。而Intel格式是Intel提出的，通常用于Microsoft的工具和Intel自身的文档。</p><p>两者区别是</p><ul><li>Intel省略了指示大小的后缀，例如l，q等</li><li>Intel省略了寄存器的‘%’前缀</li><li>Intel使用QWORD PTR [rbx]来表示内存位置，而不是(rbx)这种形式</li><li>在带有多个操作数的情况下，操作数的顺序相反，即目的寄存器在前，源寄存器在后。</li></ul><p>在gcc生成汇编代码的时候，可以使用<code>-masm=intel</code>选项指定生成Intel格式的汇编代码，默认是ATT格式。</p><h3 id=常见指令>常见指令</h3><h4 id=条件指令>条件指令</h4><p><img src=condition-instructions.png alt=img></p><p>常见TEST %rax, %rax，判断%rax是否等于0，如果等于0，会设置ZF标志位，如果后跟je指令，就满足条件，跳转</p><h4 id=跳转指令>跳转指令</h4><p><img src=x86-64-jmp.png alt></p><p>在跳转的时候，有些指令会采用PC相对寻址，即指令编码中只记录offset，实际跳转的目的指令地址是next PC + offset，即下一条指令地址+offset，而不是当前PC的值</p><h4 id=算术运算>算术运算</h4><p>add S,D -> D = D + S</p><p>sub S,D -> D = D - S</p><h4 id=数据传送>数据传送</h4><p>mov S,D -> D = S</p><p>注意movl传送四字节，会将高位四字节设置为0，这样是因为 x86-64 的惯例是任何为寄存器生成 32 位值的指令都会把该寄存器的高位部分置成0。</p><h4 id=读取有效地址>读取有效地址</h4><p>lea并不会从指定地址读取数据到目的位置，而是将地址存储到目的位置</p><h4 id=操作数格式>操作数格式</h4><p><img src=x86-64-imm.png alt></p><h3 id=栈帧>栈帧</h3><img src=x86-64-stack.png style=zoom:50%><p>x86-64提供六个寄存器用于函数参数传递（%rdi, %rsi, %rdx, %rcx, %r8, %r9），每一个调用的函数都会事先在栈上开辟空间，填入需要存储的变量。%rsp 指向栈顶位置，可以通过 pushq 和 popq 指令对 %rsp 进行操作。当函数 P 调用函数 Q 时，函数 P 会首先将函数 Q 执行完毕后的返回地址压入栈，通常返回地址是调用函数 Q 语句的下一个执行语句地址。</p><p>进入函数 Q 后，通常第一步就是事先分配栈空间，保存寄存器的值，分配局部变量，或者为函数 Q 调用的其他函数设置传递的参数。如果函数需要的参数非常多，六个寄存器不够放，那么就需要在调用者的栈中另外开辟空间，如图中的传入函数 Q 的参数7至参数n。</p><p>通常分配的栈空间是确定的，也就是在汇编代码里使用的是立即数，而对于需要使用变长栈帧的场景，例如需要动态分配栈空间，gcc会事先保存寄存器 %rbp 的值，然后将%rbp指向当前新的栈底。</p><img src=./x86-64-rbp-stack.png alt=可变栈帧 style=zoom:50%><p>当进入新的函数时（call指令），返回地址被压入栈，在栈中的地址是 %rsp</p><h3 id=结构体>结构体</h3><p>对于</p><p><img src=struct.png alt></p><p>这样的结构体，假设%rdi存储结构体的地址，那么</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>movl (%rdi) %eax # %eax = st-&gt;i
 </span></span><span style=display:flex><span>movl %eax 4(%rdi) # st-&gt;j = %eax
 </span></span></code></pre></div><h3 id=条件分支>条件分支</h3><p>条件分支转换成汇编代码，通常将有条件和无条件的跳转结合起来使用。</p><p>对于</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#00f>if</span> (test-expr)
 </span></span><span style=display:flex><span>  then-statement
@@ -125,13 +72,7 @@
 </span></span><span style=display:flex><span>  update-expr
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>然后选择jump to middle或者guarded-do方法</p><h2 id=bomb-lab>bomb lab</h2><p>分为5个阶段，需要使用objdump对bomb这个二进制文件进行反汇编</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>objdump -d ./bomb &gt; bomb.s
-</span></span></code></pre></div><p>使用gdb打断点，layout asm可以切换到汇编代码界面，si单步执行，ni调到下一条汇编指令</p><h3 id=常用gdb调试命令>常用gdb调试命令</h3><ul>
-<li>
-<p>x/[length][format] addr：打印memory[addr]的值</p></li><li>
-<p>info registers reg：打印寄存器的值，例如info registers rbp</p></li><li>
-<p>set $reg=value：设置寄存器的值</p></li><li>
-<p>ctrl-p/n：在文本模式下读取上一个/下一个执行过的命令</p></li><li>
-<p>ctrl-b/f：在文本模式下光标左/右移动</p></li></ul><h4 id=gdb断点自动执行命令>gdb断点自动执行命令</h4><p>因为起初我们无法得知字符串的具体内容，为了加快效率，我们在得到当前字符后需要将之前输入的字符进行修改，让程序继续执行，提高调试效率。gdb提供了在断点后添加命令的功能，能够在每次断点触发后自动执行。具体可以参考<a href=https://sourceware.org/gdb/current/onlinedocs/gdb/Break-Commands.html#Break-Commands>这里</a>。</p><p>注意事项：bomb lab支持使用文件输入代替终端输入，文件中的每一行输入后面都要带有一个空格，并且是作为参数传递，而不是文件重定向输入，即</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>./bomb answer.txt
+</span></span></code></pre></div><p>使用gdb打断点，layout asm可以切换到汇编代码界面，si单步执行，ni调到下一条汇编指令</p><h3 id=常用gdb调试命令>常用gdb调试命令</h3><ul><li><p>x/[length][format] addr：打印memory[addr]的值</p></li><li><p>info registers reg：打印寄存器的值，例如info registers rbp</p></li><li><p>set $reg=value：设置寄存器的值</p></li><li><p>ctrl-p/n：在文本模式下读取上一个/下一个执行过的命令</p></li><li><p>ctrl-b/f：在文本模式下光标左/右移动</p></li></ul><h4 id=gdb断点自动执行命令>gdb断点自动执行命令</h4><p>因为起初我们无法得知字符串的具体内容，为了加快效率，我们在得到当前字符后需要将之前输入的字符进行修改，让程序继续执行，提高调试效率。gdb提供了在断点后添加命令的功能，能够在每次断点触发后自动执行。具体可以参考<a href=https://sourceware.org/gdb/current/onlinedocs/gdb/Break-Commands.html#Break-Commands>这里</a>。</p><p>注意事项：bomb lab支持使用文件输入代替终端输入，文件中的每一行输入后面都要带有一个空格，并且是作为参数传递，而不是文件重定向输入，即</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>./bomb answer.txt
 </span></span></code></pre></div><p>而不是</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>./bomb &lt; answer.txt
 </span></span></code></pre></div><p>在gdb中传入命令行参数可以使用<code>run param1 param2...</code></p><h3 id=phase-1>phase 1</h3><p>通过strings_not_equal来判断输入的字符串和当前谜题字符串是否相同</p><p>第一个字符串是输入的字符串，第二个字符串是谜题字符串</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>  401338:	41 54                	push   %r12
 </span></span><span style=display:flex><span>  40133a:	55                   	push   %rbp
@@ -541,8 +482,4 @@
 </span></span><span style=display:flex><span>    <span style=color:#00f>return</span> 0;
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>是一个递归搜索二叉树的函数，因此我们可以找出0x6030f0位置的内容，分析出具体传入的数字。</p></div><div class=tags>
-</div></div></div><div class="footer wrapper">
-<nav class=nav>
-<div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script>
-</body></html>
+</span></span></code></pre></div><p>是一个递归搜索二叉树的函数，因此我们可以找出0x6030f0位置的内容，分析出具体传入的数字。</p></div><div class=tags></div></div></div><div class="footer wrapper"><nav class=nav><div>2022 © Justin Lei | <a href=https://github.com/knadh/hugo-ink>Ink</a> theme on <a href=https://gohugo.io>Hugo</a></div></nav></div><script>feather.replace()</script></body></html>
